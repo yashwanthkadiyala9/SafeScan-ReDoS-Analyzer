@@ -1,0 +1,1360 @@
+<!DOCTYPE html>
+<html lang="en" class="theme-light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SafeScan — Regex Security Workbench</title>
+<style>
+:root {
+  --site-primary: #36d6c5;
+  --site-secondary: #16232d;
+  --site-background: #0b1117;
+  --site-on-primary: #071613;
+  --site-on-secondary: #dce7ee;
+  --site-on-background: #edf3f7;
+  --site-font-body: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --site-font-heading: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --site-heading-scale: 1;
+  --site-spacing-scale: 1;
+  --site-radius-scale: 1;
+  --site-decoration-opacity: 1;
+  --bg: light-dark(#f2f5f7, #0b1117);
+  --panel: light-dark(#ffffff, #111922);
+  --panel-2: light-dark(#f8fafb, #151f29);
+  --sidebar: light-dark(#f9fbfc, #0d141c);
+  --border: light-dark(#dfe6ea, #25333f);
+  --text: light-dark(#14222b, #edf3f7);
+  --muted: light-dark(#687983, #8fa2b1);
+  --subtle: light-dark(#87959d, #607483);
+  --accent: var(--site-primary);
+  --accent-ink: #071613;
+  --teal-wash: light-dark(#e0f8f4, #10322f);
+  --red: #ff777a;
+  --red-wash: light-dark(#fff0f0, #391f25);
+  --amber: #f7bd68;
+  --amber-wash: light-dark(#fff6e9, #362b1c);
+  --green: #73ddb1;
+  --green-wash: light-dark(#e5faf0, #15372b);
+  --blue: #83aaff;
+  --blue-wash: light-dark(#edf2ff, #1b2942);
+  --radius: calc(12px * var(--site-radius-scale));
+  --space: calc(16px * var(--site-spacing-scale));
+  font-family: var(--site-font-body);
+}
+* { box-sizing: border-box; }
+html { min-height: 100%; }
+html.theme-light { color-scheme: light; --bg:#f2f5f7; --panel:#ffffff; --panel-2:#f8fafb; --sidebar:#f9fbfc; --border:#dfe6ea; --text:#14222b; --muted:#687983; --subtle:#87959d; --teal-wash:#e0f8f4; --red-wash:#fff0f0; --amber-wash:#fff6e9; --green-wash:#e5faf0; --blue-wash:#edf2ff; }
+html.theme-dark { color-scheme: dark; --bg:#0b1117; --panel:#111922; --panel-2:#151f29; --sidebar:#0d141c; --border:#25333f; --text:#edf3f7; --muted:#8fa2b1; --subtle:#607483; --teal-wash:#10322f; --red-wash:#391f25; --amber-wash:#362b1c; --green-wash:#15372b; --blue-wash:#1b2942; }
+html.theme-light .code-wrap { background:#fbfdff !important; border-color:#d5dfe6; }
+html.theme-light .code-editor { background:transparent !important; color:#172630 !important; caret-color:#172630; }
+html.theme-light .line-nums { background:#f1f5f8 !important; color:#687983 !important; border-color:#d5dfe6; }
+html.theme-light .source-code-box textarea.field, html.theme-light textarea.field.mono { background:#ffffff !important; color:#172630 !important; border-color:#d5dfe6; caret-color:#172630; }
+html.theme-light .source-code-box textarea[readonly] { background:#f8fafb !important; color:#172630 !important; opacity:1; }
+html.theme-light .terminal { background:#f5f8fa !important; color:#304653 !important; }
+html.theme-dark .code-wrap { background:#080d12 !important; border-color:#25333f; }
+html.theme-dark .code-editor { background:transparent !important; color:#edf3f7 !important; caret-color:#edf3f7; }
+html.theme-dark .line-nums { background:#111922 !important; color:#8fa2b1 !important; border-color:#25333f; }
+html.theme-dark .source-code-box textarea.field, html.theme-dark textarea.field.mono { background:#111922 !important; color:#edf3f7 !important; border-color:#25333f; caret-color:#edf3f7; }
+html.theme-dark .source-code-box textarea[readonly] { background:#0d141c !important; color:#edf3f7 !important; opacity:1; }
+html.theme-dark .terminal { background:#080d12 !important; color:#a9bac7 !important; }
+body { margin: 0; color: var(--text); background: var(--bg); font-family: var(--site-font-body); font-size: 14px; line-height: 1.45; }
+button, input, textarea, select { font: inherit; }
+button { cursor: pointer; }
+button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.app { min-height: 100vh; width: 100%; border-radius: 0; background-color: var(--site-background); background: var(--bg); display: grid; grid-template-columns: 238px minmax(0,1fr); }
+.sidebar { background: var(--sidebar); border-right: 1px solid var(--border); padding: 22px 14px 14px; display:flex; flex-direction:column; gap: 25px; min-height: 100vh; }
+.brand { display:flex; align-items:center; gap: 11px; padding: 0 9px; }
+.brand-mark { width: 34px; height: 34px; background: var(--accent); color: var(--accent-ink); border-radius: 10px; display:grid; place-items:center; box-shadow: 0 0 22px color-mix(in srgb, var(--accent) 22%, transparent); }
+.brand-name { font: 700 calc(17px * var(--site-heading-scale)) var(--site-font-heading); letter-spacing: -.6px; }
+.brand-sub { color: var(--muted); font-size: 10px; letter-spacing: 1.6px; text-transform: uppercase; margin-top: 1px; }
+.nav-label { color: var(--subtle); text-transform: uppercase; letter-spacing: 1.3px; font-size: 10px; font-weight: 700; padding: 0 12px; margin-bottom: 8px; }
+.nav { display:grid; gap: 4px; }
+.nav button { border: 1px solid transparent; background: transparent; color: var(--muted); padding: 10px 11px; border-radius: 9px; display:flex; align-items:center; gap: 11px; text-align:left; transition: .15s ease; width:100%; }
+.nav button svg { width: 17px; height:17px; flex-shrink:0; }
+.nav button:hover { background: var(--panel-2); color: var(--text); }
+.nav button.active { color: var(--text); background: var(--teal-wash); border-color: color-mix(in srgb, var(--accent) 24%, transparent); }
+.nav button.active svg { color: var(--accent); }
+.nav-count { margin-left:auto; font-size: 10px; color: var(--muted); background: var(--panel-2); padding: 2px 6px; border:1px solid var(--border); border-radius: 5px; }
+.sidebar-bottom { margin-top:auto; display:grid; gap:12px; }
+.engine-card { background: var(--panel); border:1px solid var(--border); border-radius: 10px; padding: 12px; }
+.engine-head { display:flex; align-items:center; gap:8px; font-size:12px; font-weight:650; }
+.pulse { width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px color-mix(in srgb,var(--green) 12%,transparent); }
+.engine-sub { color:var(--muted); font-size:11px; margin: 7px 0 0 15px; }
+.user-row { display:flex; align-items:center; gap:9px; padding: 8px 9px; }
+.avatar { width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--blue-wash);color:var(--blue);font-size:11px;font-weight:800; }
+.user-main { font-size:12px;font-weight:650; }
+.user-sub { color:var(--muted);font-size:10px; }
+.main { min-width:0; }
+.topbar { height:68px; border-bottom:1px solid var(--border); background:var(--panel); display:flex; align-items:center; justify-content:space-between; padding: 0 30px; gap: 12px; }
+.crumbs { display:flex; align-items:center; gap:9px; color:var(--muted); font-size:12px; min-width:0; }
+.crumbs strong { color:var(--text); font-weight:650; }
+.top-actions { display:flex; align-items:center; gap:9px; }
+.kicker { display:inline-flex; align-items:center; gap:7px; padding:6px 9px; border:1px solid var(--border); border-radius:7px; color:var(--muted); font-size:10px; white-space:nowrap; }
+.kicker .pulse { width:5px;height:5px; }
+.btn { border:1px solid var(--border); background:var(--panel); color:var(--text); border-radius:8px; padding:9px 12px; display:inline-flex; align-items:center; justify-content:center; gap:8px; font-weight:650; font-size:12px; transition: .15s; white-space:nowrap; }
+.btn:hover { border-color:var(--subtle); transform:translateY(-1px); }
+.btn svg { width:15px;height:15px; }
+.btn-primary { background:var(--accent); color:var(--accent-ink); border-color:var(--accent); }
+.btn-primary:hover { filter:brightness(1.05); border-color:var(--accent); }
+.btn-quiet { border-color:transparent; background:transparent; }
+.btn-small { padding:6px 9px; font-size:11px; }
+.content { padding:28px 30px 46px; max-width: 1600px; margin:0 auto; width:100%; }
+.view { display:none; animation:enter .18s ease; }
+.view.active { display:block; }
+@keyframes enter { from { opacity:.65; transform:translateY(3px) } to { opacity:1; transform:none } }
+.page-head { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; margin-bottom:23px; }
+.eyebrow { font-size:10px; letter-spacing:1.7px; text-transform:uppercase; color:var(--accent); font-weight:800; margin-bottom:7px; }
+h1,h2,h3,p { margin-top:0; }
+h1 { font-size:calc(26px * var(--site-heading-scale)); letter-spacing:-.9px; line-height:1.16; margin-bottom:8px; font-family:var(--site-font-heading); }
+h2 { font-size:calc(16px * var(--site-heading-scale)); letter-spacing:-.25px; margin-bottom:5px; }
+h3 { font-size:13px; margin-bottom:7px; }
+.lede { color:var(--muted); font-size:13px; max-width:720px; margin-bottom:0; line-height:1.65; }
+.panel { background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); min-width:0; }
+.panel-head { padding:16px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px; border-bottom:1px solid var(--border); }
+.panel-title { display:flex; align-items:center; gap:9px; font-size:12px; font-weight:750; }
+.panel-title .num { color:var(--subtle); font:11px ui-monospace,SFMono-Regular,Consolas,monospace; }
+.panel-body { padding:18px; }
+.muted { color:var(--muted); }
+.small { font-size:11px; }
+.mono { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
+.pill { display:inline-flex; align-items:center; gap:5px; padding:4px 7px; border-radius:5px; border:1px solid var(--border); color:var(--muted); font-size:10px; font-weight:700; letter-spacing:.1px; white-space:nowrap; }
+.pill.teal { color:var(--accent); background:var(--teal-wash); border-color:color-mix(in srgb,var(--accent) 30%,transparent); }
+.pill.red { color:var(--red); background:var(--red-wash); border-color:color-mix(in srgb,var(--red) 26%,transparent); }
+.pill.amber { color:var(--amber); background:var(--amber-wash); border-color:color-mix(in srgb,var(--amber) 24%,transparent); }
+.pill.green { color:var(--green); background:var(--green-wash); border-color:color-mix(in srgb,var(--green) 24%,transparent); }
+.pill.blue { color:var(--blue); background:var(--blue-wash); border-color:color-mix(in srgb,var(--blue) 24%,transparent); }
+.mode-toggle { display:inline-flex; padding:3px; border:1px solid var(--border); border-radius:8px; background:var(--panel-2); gap:3px; }
+.mode-toggle button { border:0;background:transparent;color:var(--muted);font-size:11px;padding:6px 9px;border-radius:5px; }
+.mode-toggle button.active { background:var(--panel);color:var(--text);box-shadow:0 1px 3px #00000012; }
+.workbench-grid { display:grid; grid-template-columns:minmax(340px,.92fr) minmax(400px,1.08fr); gap:16px; align-items:stretch; }
+.editor-card { display:flex; flex-direction:column; min-height:455px; }
+.editor-tools { display:flex; gap:7px; flex-wrap:wrap; }
+.sample-chip { border:1px solid var(--border); background:var(--panel-2); color:var(--muted); border-radius:6px; padding:6px 8px; font:10px ui-monospace,SFMono-Regular,Consolas,monospace; }
+.sample-chip:hover { color:var(--text);border-color:var(--accent); }
+.code-wrap { position:relative; margin-top:14px; flex:1; display:flex; min-height:200px; border:1px solid var(--border); border-radius:9px; overflow:hidden; background:light-dark(#fbfcfd,#0b1016); }
+.line-nums { user-select:none; padding:15px 10px; text-align:right; color:var(--subtle); border-right:1px solid var(--border); font:12px/1.8 ui-monospace,SFMono-Regular,Consolas,monospace; white-space:pre; min-width:37px; background:var(--panel-2); }
+textarea.code-editor { width:100%; min-height:200px; resize:vertical; border:0; outline:none; background:transparent; color:var(--text); padding:15px 14px; line-height:1.8; font:12px/1.8 ui-monospace,SFMono-Regular,Consolas,monospace; }
+textarea.code-editor:focus { outline:none; }
+.editor-meta { display:flex; justify-content:space-between; gap:10px; color:var(--muted); font-size:10px; padding-top:10px; }
+.editor-footer { padding:14px 18px 18px; display:flex; align-items:center; justify-content:space-between; gap:9px; border-top:1px solid var(--border); margin-top:15px; }
+.result-card { display:flex; flex-direction:column; min-height:455px; }
+.result-hero { padding:18px; border-bottom:1px solid var(--border); }
+.result-top { display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px; }
+.result-verdict { display:flex; align-items:center; gap:11px; }
+.verdict-icon { width:38px;height:38px;border-radius:10px;display:grid;place-items:center;background:var(--red-wash);color:var(--red);flex-shrink:0; }
+.verdict-icon.safe { background:var(--green-wash);color:var(--green); }
+.verdict-icon.warn { background:var(--amber-wash);color:var(--amber); }
+.verdict-title { font-size:15px;font-weight:800;letter-spacing:-.2px; }
+.verdict-sub { font-size:11px;color:var(--muted);margin-top:3px; }
+.risk-copy { color:var(--muted);font-size:12px;line-height:1.7;margin:0; }
+.result-metrics { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:14px 18px;border-bottom:1px solid var(--border); }
+.metric { background:var(--panel-2);border:1px solid var(--border);padding:11px;border-radius:8px;min-width:0; }
+.metric-label { color:var(--muted);font-size:10px;margin-bottom:6px; }
+.metric-value { font:700 17px ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:-.5px; }
+.metric-foot { color:var(--muted);font-size:9px;margin-top:4px; }
+.pipeline { padding:14px 18px; }
+.pipeline-title { display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;font-size:11px;font-weight:750; }
+.pipeline-track { display:flex;gap:4px;align-items:center; }
+.pipe-step { min-width:0;flex:1;text-align:center; }
+.pipe-dot { width:25px;height:25px;border:1px solid var(--border);border-radius:7px;margin:0 auto 6px;display:grid;place-items:center;background:var(--panel-2);color:var(--muted);font-size:10px;font-weight:800; }
+.pipe-step.done .pipe-dot { background:var(--teal-wash);color:var(--accent);border-color:color-mix(in srgb,var(--accent) 35%,transparent); }
+.pipe-step.active .pipe-dot { background:var(--accent);color:var(--accent-ink);border-color:var(--accent); }
+.pipe-label { color:var(--muted);font-size:9px;line-height:1.3;overflow-wrap:anywhere; }
+.pipeline-link { height:1px;flex:0 0 8px;background:var(--border);margin-bottom:18px; }
+.insight-list { display:grid;gap:9px; }
+.insight { display:flex;align-items:flex-start;gap:9px;color:var(--muted);font-size:11px;line-height:1.55; }
+.insight svg { width:14px;height:14px;flex-shrink:0;margin-top:2px; }
+.workbench-bottom { display:grid;grid-template-columns:1.2fr .8fr;gap:16px;margin-top:16px; }
+.code-line { display:flex;gap:12px;padding:7px 0;border-bottom:1px solid var(--border);font:11px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace; }
+.code-line:last-child { border-bottom:0; }
+.code-line .ln { color:var(--subtle);width:18px;text-align:right;flex-shrink:0; }
+.code-line .code { color:var(--text);overflow-wrap:anywhere; }
+.code-line .code.highlight { background:var(--red-wash);color:var(--red);display:block;flex:1;padding:2px 5px;border-radius:4px; }
+.feature-row { display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px; }
+.feature-card { padding:14px; }
+.feature-top { display:flex;align-items:center;justify-content:space-between;margin-bottom:13px; }
+.feature-icon { width:31px;height:31px;display:grid;place-items:center;border-radius:8px;background:var(--panel-2);border:1px solid var(--border);color:var(--accent); }
+.feature-icon svg { width:16px;height:16px; }
+.feature-value { font:750 22px ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:-.9px; }
+.feature-name { font-size:11px;font-weight:700;margin-top:3px; }
+.feature-note { color:var(--muted);font-size:10px;margin-top:6px; }
+.table-wrap { overflow:auto; }
+table { width:100%;border-collapse:collapse;font-size:11px; }
+th { color:var(--muted);text-transform:uppercase;letter-spacing:.8px;font-size:9px;font-weight:800;text-align:left;background:var(--panel-2); }
+th,td { padding:13px 15px;border-bottom:1px solid var(--border);white-space:nowrap; }
+tbody tr:last-child td { border-bottom:0; }
+tbody tr:hover { background:var(--panel-2); }
+td code { font:11px ui-monospace,SFMono-Regular,Consolas,monospace;color:var(--text); }
+.row-link { cursor:pointer; }
+.state-toolbar { display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding-bottom:14px; }
+.graph-panel { overflow:hidden; }
+.graph-wrap { width:100%;overflow:auto;background:light-dark(#fcfdfd,#0d141b);padding:8px; }
+.graph-wrap svg { display:block;max-width:100%;height:auto;margin:auto; }
+.automata-node { cursor:pointer; outline:none; }
+.automata-node circle { transition:stroke .18s ease,stroke-width .18s ease,filter .18s ease,fill .18s ease; }
+.automata-node:hover circle,.automata-node:focus circle { stroke:var(--accent);stroke-width:2.5; }
+.automata-node.selected circle { stroke:#36d6c5;stroke-width:3;filter:drop-shadow(0 0 7px #36d6c566); }
+.automata-node.walk-active circle { stroke:#f7bd68;stroke-width:3.5;filter:drop-shadow(0 0 9px #f7bd6866); }
+.automata-edge { transition:stroke .2s ease,stroke-width .2s ease,opacity .2s ease; cursor:pointer; pointer-events:stroke; }
+.automata-edge.outgoing { stroke:#36d6c5!important;stroke-width:2.4!important; }
+.automata-edge.walk-active { stroke:#f7bd68!important;stroke-width:3.4!important;stroke-dasharray:6 4;animation:edgeFlow .65s linear infinite; }
+.automata-edge.edge-selected { stroke:#b7a0ff!important;stroke-width:4!important;filter:drop-shadow(0 0 5px #b7a0ff88); }
+@keyframes edgeFlow { to { stroke-dashoffset:-20; } }
+.walk-console { margin-top:16px; }
+.walk-controls { display:flex;align-items:end;justify-content:space-between;gap:12px;flex-wrap:wrap; }
+.walk-buttons { display:flex;gap:7px;flex-wrap:wrap; }
+.walk-state-grid { display:grid;grid-template-columns:minmax(180px,.72fr) minmax(0,1.28fr);gap:12px;margin-top:14px; }
+.walk-state-card { background:var(--panel-2);border:1px solid var(--border);border-radius:9px;padding:13px;min-width:0; }
+.walk-state-title { font-size:12px;font-weight:800;margin-bottom:6px; }
+.walk-state-detail { color:var(--muted);font-size:11px;line-height:1.6;overflow-wrap:anywhere; }
+.walk-track { display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:13px; }
+.walk-frame { border:1px solid var(--border);background:var(--panel-2);border-radius:7px;padding:7px 9px;font:10px ui-monospace,SFMono-Regular,Consolas,monospace;color:var(--muted); }
+.walk-frame.active { border-color:var(--accent);background:var(--teal-wash);color:var(--text);box-shadow:0 0 0 1px color-mix(in srgb,var(--accent) 18%,transparent); }
+.walk-status { padding:10px 12px;border:1px solid var(--border);background:var(--panel-2);color:var(--muted);border-radius:8px;font-size:11px;line-height:1.55;margin-top:12px; }
+.walk-status strong { color:var(--text); }
+.risk-breakdown { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0 0 16px; }
+.risk-breakdown-item { border:1px solid var(--border);border-radius:9px;background:var(--panel);padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px; }
+.risk-breakdown-item strong { font:750 19px ui-monospace,SFMono-Regular,Consolas,monospace; }
+.risk-breakdown-item span { font-size:11px;color:var(--muted); }
+.finding-type-note { padding:10px 16px; border-bottom:1px solid var(--border); background:var(--panel-2); color:var(--muted); font-size:11px; line-height:1.55; }
+.source-repair-grid { display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px; }
+.source-code-box { display:flex;flex-direction:column;gap:7px;min-width:0; }
+.source-code-box label { display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:11px;font-weight:750; }
+.source-code-box textarea { width:100%;min-height:230px;resize:vertical;line-height:1.65;white-space:pre;tab-size:2;font-size:11px; }
+.source-code-box textarea[readonly] { opacity:.96; }
+.history-summary { display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px; }
+.history-metric { border:1px solid var(--border);border-radius:var(--radius);background:var(--panel);padding:14px;min-width:0; }
+.history-metric .number { font:750 21px ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:-.6px;margin:8px 0 3px; }
+.history-metric .label { color:var(--muted);font-size:11px; }
+.history-metric .note { color:var(--subtle);font-size:10px;margin-top:5px; }
+.history-input { display:block;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:11px ui-monospace,SFMono-Regular,Consolas,monospace; }
+.history-time { white-space:nowrap;font-size:11px; }
+.accent-select { width:104px;padding:7px 8px;font-size:11px; }
+#view-automata.active { display:flex;flex-direction:column; }
+#view-automata.active > .page-head { order:0; }
+#view-automata.active > .graph-panel { order:1; }
+#view-automata.active > .walk-console { order:2; }
+#view-automata.active > .graph-grid { order:3; }
+.graph-legend { display:flex;gap:15px;flex-wrap:wrap;padding:12px 16px;border-top:1px solid var(--border);color:var(--muted);font-size:10px; }
+.legend-dot { width:8px;height:8px;display:inline-block;border-radius:50%;margin-right:5px; }
+.graph-grid { display:grid;grid-template-columns:minmax(0,1.25fr) minmax(270px,.75fr);gap:16px; }
+.transition-list { display:grid;gap:0;max-height:320px;overflow:auto; }
+.transition-row { display:grid;grid-template-columns:52px minmax(55px,1fr) 42px;gap:8px;padding:9px 0;border-bottom:1px solid var(--border);font:10px ui-monospace,SFMono-Regular,Consolas,monospace;align-items:center; }
+.transition-row:last-child { border-bottom:0; }
+.transition-row .muted { font-family:var(--site-font-body);font-size:10px; }
+.form-field { display:grid;gap:6px;min-width:0; }
+.form-field label { color:var(--muted);font-size:11px;font-weight:650; }
+.field { width:100%;border:1px solid var(--border);border-radius:8px;background:var(--panel-2);color:var(--text);padding:10px 11px;font-size:12px;min-width:0; }
+.field.mono { font-size:12px; }
+.inline-form { display:flex;gap:8px;align-items:end; }
+.inline-form .form-field { flex:1; }
+.accept-result { padding:12px;border-radius:8px;border:1px solid var(--border);background:var(--panel-2);margin-top:12px; }
+.accept-result strong { display:block;font-size:12px;margin-bottom:4px; }
+.accept-result p { margin:0;color:var(--muted);font-size:11px;line-height:1.55; }
+.accept-result.success { border-color:color-mix(in srgb,var(--green) 36%,transparent);background:var(--green-wash); }
+.accept-result.failure { border-color:color-mix(in srgb,var(--red) 36%,transparent);background:var(--red-wash); }
+.steps { display:flex;flex-wrap:wrap;gap:6px;padding:12px 0 0; }
+.step-chip { border:1px solid var(--border);border-radius:6px;padding:6px 8px;color:var(--muted);font:10px ui-monospace,SFMono-Regular,Consolas,monospace; }
+.step-chip.current { background:var(--teal-wash);color:var(--accent);border-color:var(--accent); }
+.split { display:grid;grid-template-columns:1fr 1fr;gap:14px; }
+.info-grid { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px; }
+.info-card { padding:17px; }
+.info-number { font:700 11px ui-monospace,SFMono-Regular,Consolas,monospace;color:var(--accent);margin-bottom:12px; }
+.info-card p { color:var(--muted);font-size:11px;line-height:1.7;margin:0; }
+.info-card h3 { font-size:13px; }
+.pipeline-list { display:grid;gap:0; }
+.pipeline-item { display:grid;grid-template-columns:30px 1fr auto;gap:12px;align-items:start;padding:13px 0;border-bottom:1px solid var(--border); }
+.pipeline-item:last-child { border-bottom:0; }
+.pipeline-num { width:26px;height:26px;border:1px solid var(--border);border-radius:7px;display:grid;place-items:center;font:10px ui-monospace,SFMono-Regular,Consolas,monospace;color:var(--accent); }
+.pipeline-desc strong { display:block;font-size:12px;margin-bottom:3px; }
+.pipeline-desc p { color:var(--muted);font-size:11px;margin:0;line-height:1.6; }
+.terminal { background:light-dark(#f5f8fa,#080d12);border:1px solid var(--border);padding:13px;border-radius:8px;font:11px/1.8 ui-monospace,SFMono-Regular,Consolas,monospace;color:var(--muted);white-space:pre-wrap;overflow-wrap:anywhere; }
+.terminal .good { color:var(--green); }
+.terminal .warn { color:var(--amber); }
+.terminal .danger { color:var(--red); }
+.taint-nodes { display:grid;gap:0;max-width:760px;margin:0 auto; }
+.taint-node { border:1px solid var(--border);border-radius:9px;background:var(--panel);padding:14px;display:flex;align-items:center;gap:12px; }
+.taint-icon { width:34px;height:34px;border:1px solid var(--border);border-radius:8px;display:grid;place-items:center;background:var(--panel-2);color:var(--accent);flex-shrink:0; }
+.taint-icon svg { width:16px;height:16px; }
+.taint-node strong { display:block;font-size:12px; }
+.taint-node span { display:block;font:11px ui-monospace,SFMono-Regular,Consolas,monospace;color:var(--muted);margin-top:3px;overflow-wrap:anywhere; }
+.taint-arrow { height:33px;border-left:1px dashed var(--accent);margin-left:31px;position:relative; }
+.taint-arrow:after { content:"";position:absolute;bottom:0;left:-4px;width:7px;height:7px;border-right:1px solid var(--accent);border-bottom:1px solid var(--accent);transform:rotate(45deg); }
+.status-note { display:flex;gap:9px;align-items:flex-start;padding:12px 13px;border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:11px;line-height:1.6; }
+.status-note svg { width:15px;height:15px;flex-shrink:0;margin-top:1px; }
+.empty-state { padding:27px 12px;text-align:center;color:var(--muted);font-size:12px; }
+.toast { position:fixed;bottom:22px;right:24px;max-width:360px;background:var(--panel);border:1px solid var(--border);border-radius:9px;box-shadow:0 12px 40px #0003;padding:12px 15px;font-size:12px;z-index:99;display:none; }
+.toast.show { display:block;animation:enter .2s ease; }
+.footer-note { color:var(--muted);font-size:10px;margin-top:15px; }
+.kbd { font:10px ui-monospace,SFMono-Regular,Consolas,monospace;border:1px solid var(--border);padding:2px 5px;border-radius:4px;color:var(--muted); }
+.hidden { display:none!important; }
+@media (max-width: 1050px) {
+ .app { grid-template-columns: 206px minmax(0,1fr); }
+ .content { padding:22px 20px 36px; }
+ .topbar { padding:0 20px; }
+ .workbench-grid { grid-template-columns:1fr; }
+ .editor-card,.result-card { min-height:auto; }
+ .feature-row { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media (max-width: 720px) {
+ .app { grid-template-columns:1fr; }
+ .sidebar { min-height:auto;padding:12px;gap:13px;border-right:0;border-bottom:1px solid var(--border); }
+ .brand { padding:2px 4px; }
+ .sidebar > .nav-section:first-of-type .nav-label { display:none; }
+ .nav { display:flex;overflow-x:auto;gap:5px;padding-bottom:3px; }
+ .nav button { width:auto;white-space:nowrap;padding:8px 10px; }
+ .nav button span.nav-text { display:inline; }
+ .nav-label { display:none; }
+ .sidebar-bottom { display:none; }
+ .topbar { height:56px;padding:0 14px; }
+ .kicker { display:none; }
+ .content { padding:20px 13px 30px; }
+ .page-head { flex-direction:column; }
+ .page-head>.top-actions { width:100%; }
+ .page-head>.top-actions .btn { flex:1; }
+ h1 { font-size:24px; }
+ .workbench-grid { grid-template-columns:minmax(0,1fr); }
+ .workbench-bottom,.graph-grid,.split,.info-grid,.walk-state-grid,.risk-breakdown,.source-repair-grid,.history-summary { grid-template-columns:1fr; }
+ .feature-row { gap:8px; }
+ .feature-card { padding:11px; }
+ .result-metrics { padding:12px; }
+ .panel-body { padding:14px; }
+ .panel-head { padding:14px; }
+ .inline-form { align-items:stretch;flex-direction:column; }
+ .pipeline-item { grid-template-columns:28px 1fr; }
+ .pipeline-item .pill { grid-column:2;justify-self:start; }
+ .crumbs { font-size:11px; }
+ .top-actions .btn { padding:8px 9px; }
+}
+</style>
+</head>
+<body>
+<div class="app" id="appRoot">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true"><svg width="21" height="21" viewBox="0 0 24 24" fill="none"><path d="M12 2.5 20 5.8v5.7c0 5.1-3.3 8.2-8 10-4.7-1.8-8-4.9-8-10V5.8L12 2.5Z" stroke="currentColor" stroke-width="1.8"/><path d="m8.5 9  -2 3 2 3M15.5 9l2 3-2 3M13.5 8l-3 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div><div class="brand-name">SafeScan<span style="color:var(--accent)">.</span></div><div class="brand-sub">Regex security lab</div></div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Workbench</div>
+      <nav class="nav" aria-label="Main navigation">
+        <button class="active" data-view="workbench"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v5m-1 4 2 2-2 2"/></svg><span class="nav-text">Analysis Workbench</span></button>
+        <button data-view="automata"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="6" cy="12" r="3"/><circle cx="18" cy="6" r="3"/><circle cx="18" cy="18" r="3"/><path d="m9 11 6-4M9 13l6 4M15 6h-3"/></svg><span class="nav-text">Automata Lab</span><span class="nav-count" id="navStates">—</span></button>
+        <button data-view="findings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3 22 20H2L12 3Z"/><path d="M12 9v5m0 3v.2"/></svg><span class="nav-text">Findings</span><span class="nav-count" id="navFindings">1</span></button>
+        <button data-view="history"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2M4 4v5h5"/></svg><span class="nav-text">Scan history</span><span class="nav-count" id="navHistory">0</span></button>
+        <button data-view="taint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="5" cy="5" r="2"/><circle cx="19" cy="19" r="2"/><path d="M7 5h4a3 3 0 0 1 3 3v2a3 3 0 0 0 3 3h2M5 7v6a3 3 0 0 0 3 3h4"/></svg><span class="nav-text">Taint Flow</span></button>
+        <button data-view="repair"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M6 9a7 7 0 0 1 12-2l2 5M4 12l2 5a7 7 0 0 0 12-2"/></svg><span class="nav-text">Repair Execution</span></button>
+      </nav>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Project</div>
+      <nav class="nav"><button data-view="architecture"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="8.5" y="14" width="7" height="7" rx="1.5"/><path d="M10 6.5h4M17.5 10v1.5a2 2 0 0 1-2 2M6.5 10v1.5a2 2 0 0 0 2 2"/></svg><span class="nav-text">Architecture</span></button></nav>
+    </div>
+    <div class="sidebar-bottom">
+      <div class="user-row"><div class="avatar">SS</div><div><div class="user-main">SafeScan Lab</div><div class="user-sub">Regex security workspace</div></div></div>
+    </div>
+  </aside>
+  <main class="main">
+    <header class="topbar">
+      <div class="crumbs"><span>SafeScan</span><span>›</span><strong id="breadcrumb">Analysis Workbench</strong></div>
+      <div class="top-actions"><span class="kicker"><span class="pulse"></span> ANALYSIS ENGINE READY</span><select class="field accent-select hidden" id="accentSelect" aria-label="Accent color" hidden><option value="teal">Teal accent</option><option value="blue">Blue accent</option><option value="violet">Violet accent</option></select><button class="btn" id="themeToggle" type="button" aria-label="Switch to dark theme" title="Switch to dark theme"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.8 14.3A8.5 8.5 0 0 1 9.7 3.2 8.7 8.7 0 1 0 20.8 14.3Z"/></svg><span id="themeToggleLabel">Dark mode</span></button><button class="btn btn-primary" id="topNewScan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>New scan</button></div>
+    </header>
+    <div class="content">
+      <section class="view active" id="view-workbench">
+        <div class="page-head">
+          <div><div class="eyebrow">Security research / 01</div><h1>Analysis workbench</h1><p class="lede">Inspect a regular expression, explore its automata, and review risk signals. Results are produced locally by this prototype's supported analysis engine.</p></div>
+          <div class="top-actions"><span class="pill teal">● Local mode</span><button class="btn" id="exportReport"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3v12m-4-4 4 4 4-4M4 17v4h16v-4"/></svg>Export report</button></div>
+        </div>
+        <div class="workbench-grid">
+          <section class="panel editor-card">
+            <div class="panel-head"><div class="panel-title"><span class="num">01</span> INPUT SOURCE</div><div class="mode-toggle" id="inputMode"><button class="active" data-mode="regex">Regex</button><button data-mode="source">Source code</button></div></div>
+            <div class="panel-body" style="display:flex;flex-direction:column;flex:1">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><div><div class="small muted" id="editorPrompt">Regex pattern</div><div class="mono" style="font-size:11px;margin-top:3px" id="fileHint">pattern.regex</div></div><span class="pill" id="languagePill">REGEX</span></div>
+              <div class="editor-tools" style="margin-top:13px" id="sampleChips"><button class="sample-chip" data-sample="risk">Nested quantifier</button><button class="sample-chip" data-sample="overlap">Overlapping alternation</button><button class="sample-chip" data-sample="adjacent">Overlapping quantifiers</button><button class="sample-chip" data-sample="safe">Safe pattern</button></div>
+              <div class="editor-tools source-only hidden" style="margin-top:10px" id="sourceFileTools"><button class="btn btn-small" id="uploadSourceButton" type="button">＋ Add files</button><button class="btn btn-small" id="uploadFolderButton" type="button">＋ Add repository folder</button><button class="btn btn-small btn-quiet" id="clearSourceFiles" type="button">Clear</button><span class="small muted" id="sourceFileName">Paste code or add multiple files</span></div>
+              <input type="file" id="sourceFileInput" accept=".js,.mjs,.cjs,.jsx,.ts,.tsx,.zip,application/zip" multiple hidden>
+              <input type="file" id="sourceFolderInput" accept=".js,.mjs,.cjs,.jsx,.ts,.tsx" webkitdirectory directory multiple hidden>
+              <div class="small muted hidden" style="margin-top:8px;line-height:1.5" id="sourceBatchSummary">Select multiple JavaScript/TypeScript files, a repository folder, or a GitHub ZIP archive. ZIPs are unpacked locally in the browser.</div>
+              <div class="code-wrap"><div class="line-nums" id="lineNumbers">1</div><textarea id="sourceInput" class="code-editor" spellcheck="false" aria-label="Regex or source input" placeholder="Enter a regular expression">^(a+)+$</textarea></div>
+              <div class="editor-meta"><span id="inputHint">Supported: literals, groups, |, *, +, ?, character classes</span><span id="charCount">7 chars</span></div>
+              <div class="editor-footer" style="padding-left:0;padding-right:0;padding-bottom:0"><span class="small muted" id="lastRunLabel">Example loaded · not a repository scan</span><button class="btn btn-primary" id="runAnalysis"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m8 5 11 7-11 7V5Z"/></svg>Run analysis</button></div>
+            </div>
+          </section>
+          <section class="panel result-card">
+            <div class="panel-head"><div class="panel-title"><span class="num">02</span> ANALYSIS RESULT</div><span class="pill teal" id="resultStatus">READY</span></div>
+            <div class="result-hero"><div class="result-top"><div class="result-verdict"><div class="verdict-icon" id="verdictIcon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3 22 20H2L12 3Z"/><path d="M12 9v5m0 3v.1"/></svg></div><div><div class="verdict-title" id="verdictTitle">Potential ReDoS risk</div><div class="verdict-sub" id="verdictSub">Heuristic finding · nested repetition</div></div></div><span class="pill red" id="severityPill">HIGH RISK</span></div><p class="risk-copy" id="riskCopy">Repeated groups around another repetition can create many equivalent paths in a backtracking regex engine. This is a structural warning, not a benchmark of runtime behavior.</p></div>
+            <div class="result-metrics"><div class="metric"><div class="metric-label">NFA states</div><div class="metric-value" id="nfaMetric">—</div><div class="metric-foot">Thompson construction</div></div><div class="metric"><div class="metric-label">DFA states</div><div class="metric-value" id="dfaMetric">—</div><div class="metric-foot">Subset construction</div></div><div class="metric"><div class="metric-label">Minimal DFA</div><div class="metric-value" id="minMetric">—</div><div class="metric-foot">Partition refinement</div></div></div>
+            <div class="pipeline"><div class="pipeline-title"><span>Processing pipeline</span><span class="small muted" id="pipelineProgress">8 stages available</span></div><div class="pipeline-track" id="pipelineTrack">
+              <div class="pipe-step done"><div class="pipe-dot">01</div><div class="pipe-label">Parse</div></div><div class="pipeline-link"></div><div class="pipe-step done"><div class="pipe-dot">02</div><div class="pipe-label">Regex AST</div></div><div class="pipeline-link"></div><div class="pipe-step done"><div class="pipe-dot">03</div><div class="pipe-label">ε-NFA</div></div><div class="pipeline-link"></div><div class="pipe-step done"><div class="pipe-dot">04</div><div class="pipe-label">DFA</div></div><div class="pipeline-link"></div><div class="pipe-step active"><div class="pipe-dot">05</div><div class="pipe-label">Assess</div></div>
+            </div></div>
+          </section>
+        </div>
+        <section class="panel hidden" id="sourceRepairPanel" style="margin-top:16px">
+          <div class="panel-head"><div><div class="panel-title">Source-code repair preview</div><div class="small muted" style="margin-top:5px">The original stays untouched; only equivalent, supported edits are proposed.</div><select class="field mono" id="repairFileSelect" aria-label="File to preview" style="max-width:100%;margin-top:9px"><option value="">No source files analyzed</option></select></div><span class="pill" id="sourceRepairStatus">WAITING FOR SOURCE</span></div>
+          <div class="panel-body"><div class="small muted" id="sourceRepairSummary" style="margin-bottom:12px">Run source analysis to populate the repair preview.</div><div class="source-repair-grid">
+            <div class="source-code-box"><label for="sourceOriginalPreview">Original source <span class="pill">INPUT</span></label><textarea class="field mono" id="sourceOriginalPreview" rows="11" readonly spellcheck="false"></textarea></div>
+            <div class="source-code-box"><label for="sourceCorrectedPreview">Corrected source preview <span class="pill teal" id="correctedCodeBadge">PREVIEW</span></label><textarea class="field mono" id="sourceCorrectedPreview" rows="11" readonly spellcheck="false"></textarea></div>
+          </div><div class="status-note" style="margin-top:12px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-8h.1"/></svg><span id="sourceRepairNote">Paste or upload source code to see whether this prototype can suggest and verify a safe regex edit.</span></div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="btn" id="copyCorrectedCode" type="button" disabled>Copy corrected code</button><button class="btn btn-primary" id="downloadCorrectedCode" type="button" disabled>Download corrected file</button></div></div>
+        </section>
+        <div class="workbench-bottom">
+          <section class="panel"><div class="panel-head"><div class="panel-title">Analysis evidence</div><button class="btn btn-small btn-quiet" data-go="automata">Inspect automata ↗</button></div><div class="panel-body"><div id="evidenceCode"></div><div class="status-note" style="margin-top:12px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-8h.1"/></svg><span id="evidenceNote">Finding is based on a supported structural heuristic. Confirm behavior in the target regex engine before treating it as exploitable.</span></div></div></section>
+          <section class="panel"><div class="panel-head"><div class="panel-title">Next steps</div><span class="pill">SUGGESTED</span></div><div class="panel-body"><div class="insight-list" id="nextSteps"><div class="insight"><span style="color:var(--accent)">↗</span><span>Open Automata Lab to inspect generated states and transitions.</span></div><div class="insight"><span style="color:var(--accent)">↗</span><span>Open Repair Execution to review verified code corrections.</span></div><div class="insight"><span style="color:var(--accent)">↗</span><span>Use Taint Flow to see a limited source-to-sink example.</span></div></div><div style="margin-top:17px"><button class="btn" style="width:100%" data-go="repair">Open Repair Execution <span>→</span></button></div></div></section>
+        </div>
+      </section>
+
+      <section class="view" id="view-automata">
+        <div class="page-head"><div><div class="eyebrow">Automata Theory / 02</div><h1>Automata laboratory</h1><p class="lede">Explore the state machines generated from the current regex. These diagrams and transition tables come from the local Thompson-NFA and subset-construction implementation.</p></div><div class="top-actions"><span class="pill teal" id="automataPatternPill">PATTERN: (a+)+</span><button class="btn" data-go="workbench">← Back to analysis</button></div></div>
+        <div class="panel graph-panel"><div class="panel-head"><div><div class="panel-title">State-transition graph</div><div class="small muted" id="graphSubtitle" style="margin-top:5px">Start state and accepting states are highlighted.</div></div><div class="mode-toggle" id="graphMode"><button class="active" data-graph="nfa">ε-NFA</button><button data-graph="dfa">DFA</button><button data-graph="min">Minimal DFA</button></div></div><div class="graph-wrap" id="graphWrap"><div class="empty-state">Run a supported pattern to generate an automaton.</div></div><div class="graph-legend"><span><i class="legend-dot" style="background:var(--accent)"></i>Start state</span><span><i class="legend-dot" style="background:var(--blue)"></i>Accepting state</span><span><i class="legend-dot" style="background:var(--muted)"></i>Intermediate state</span><span>ε = empty transition</span></div></div>
+        <div class="graph-grid" style="margin-top:16px"><section class="panel"><div class="panel-head"><div class="panel-title">Transition table</div><span class="pill" id="transitionCount">0 transitions</span></div><div class="panel-body"><div class="transition-list" id="transitionList"><div class="empty-state">Generate an automaton to inspect transitions.</div></div></div></section><section class="panel"><div class="panel-head"><div class="panel-title">Test a string</div><span class="pill teal">DFA simulation</span></div><div class="panel-body"><p class="small muted">Test an input against the generated deterministic automaton. Matching is performed over the full string.</p><div class="inline-form"><div class="form-field"><label for="testString">Input string (ASCII)</label><input class="field mono" id="testString" value="aaaa" placeholder="Enter test string"></div><button class="btn btn-primary" id="testStringBtn">Test</button></div><div id="testResult"></div><div style="margin-top:15px"><div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><strong style="font-size:11px">Step through transitions</strong><div style="display:flex;gap:5px"><button class="btn btn-small" id="stepReset">Reset</button><button class="btn btn-small" id="stepNext">Next character →</button></div></div><div class="steps" id="stepChips"></div><div class="small muted" id="stepExplanation" style="margin-top:9px">Run a string test to inspect the path.</div></div></div></section></div>
+        <section class="panel walk-console">
+          <div class="panel-head"><div><div class="panel-title">Live transition walkthrough</div><div class="small muted" style="margin-top:5px">Press one step at a time. Click a specific edge in the graph to focus only that transition.</div></div><span class="pill teal">STEP-BY-STEP</span></div>
+          <div class="panel-body">
+            <div class="walk-controls"><div class="form-field" style="max-width:250px;flex:1"><label for="walkInput">Input sequence to trace</label><input class="field mono" id="walkInput" value="aaaa" placeholder="Enter a short ASCII string"></div><div class="walk-buttons"><button class="btn btn-primary" id="walkStart" type="button">◇ Start / next</button><button class="btn" id="walkPrev" type="button">← Previous</button><button class="btn" id="walkNext" type="button">Next transition →</button><button class="btn" id="walkReset" type="button">Reset animation</button></div></div>
+            <div class="walk-status" id="walkStatus" role="status">Choose ε-NFA, DFA, or Minimal DFA above. Click a state to inspect it, or animate the example string “aaaa”.</div>
+            <div class="walk-state-grid"><div class="walk-state-card"><div class="walk-state-title" id="selectedStateTitle">Select a state</div><div class="walk-state-detail" id="selectedStateInfo">Click any circle in the graph to see whether it is the start or accepting state and inspect its outgoing transitions.</div></div><div class="walk-state-card"><div class="walk-state-title">Transition timeline</div><div class="walk-state-detail">Each frame represents one consumed symbol. For an NFA, the active-state set includes ε-closure results.</div><div class="walk-track" id="walkStepTrack"><span class="walk-frame">Waiting for animation</span></div></div></div>
+          </div>
+        </section>
+      </section>
+
+      <section class="view" id="view-findings">
+        <div class="page-head"><div><div class="eyebrow">Security review / 03</div><h1>Findings & evidence</h1><p class="lede">Review results produced by your current analysis session. Findings are limited to patterns detected by this prototype's heuristic rules.</p></div><div class="top-actions"><button class="btn" id="findingsExport">Export JSON</button><button class="btn btn-primary" data-go="workbench">Run new scan</button></div></div>
+        <div class="risk-breakdown" aria-label="Risk severity summary"><div class="risk-breakdown-item"><span><i class="legend-dot" style="background:var(--red)"></i>High risk</span><strong id="countHigh">0</strong></div><div class="risk-breakdown-item"><span><i class="legend-dot" style="background:var(--amber)"></i>Moderate risk</span><strong id="countModerate">0</strong></div><div class="risk-breakdown-item"><span><i class="legend-dot" style="background:var(--green)"></i>No known signal</span><strong id="countLow">0</strong></div></div>
+        <div class="feature-row"><div class="panel feature-card"><div class="feature-top"><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v14H4zM8 9h8M8 13h5"/></svg></div><span class="pill">SESSION</span></div><div class="feature-value" id="findTotal">1</div><div class="feature-name">Patterns analyzed</div><div class="feature-note">In this browser session</div></div><div class="panel feature-card"><div class="feature-top"><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3 22 20H2L12 3Z"/><path d="M12 9v5m0 3v.1"/></svg></div><span class="pill red">RISK</span></div><div class="feature-value" id="findRisk">1</div><div class="feature-name">Potential risk signals</div><div class="feature-note">Heuristics, not exploit proof</div></div><div class="panel feature-card"><div class="feature-top"><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M8 12h8m-4-4v8"/></svg></div><span class="pill blue">ENGINE</span></div><div class="feature-value" id="findStates">—</div><div class="feature-name">Current minimal states</div><div class="feature-note">After DFA minimization</div></div><div class="panel feature-card"><div class="feature-top"><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m5 12 4 4L19 6"/><circle cx="12" cy="12" r="9"/></svg></div><span class="pill green">VERIFY</span></div><div class="feature-value" id="findVerified">0</div><div class="feature-name">Verified repairs</div><div class="feature-note">Checks performed this session</div></div></div>
+        <section class="panel"><div class="panel-head"><div class="panel-title">Current session findings</div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><input class="field" id="findingSearch" placeholder="Filter by pattern…" style="width:180px;padding:7px 9px"><select class="field" id="findingFilter" aria-label="Filter by status" style="width:auto;padding:7px 9px"><option value="all">All statuses</option><option value="risk">Potential risk</option><option value="clear">No known signal</option><option value="error">Unsupported</option></select><select class="field" id="findingTypeFilter" aria-label="Filter by regex type" style="width:auto;padding:7px 9px"><option value="all">All regex types</option><option value="nested">Nested quantifier</option><option value="overlap">Overlapping alternation</option><option value="clear">No known signal</option><option value="unsupported">Unsupported syntax</option></select></div></div><div class="finding-type-note" id="findingTypeInfo" role="status">Nested quantifiers can multiply backtracking paths; overlapping alternatives can trigger repeated path reconsideration on failing input. These are heuristic warnings, not proof of exploitability.</div><div class="table-wrap"><table><thead><tr><th>Pattern</th><th>File / line</th><th>Assessment</th><th>Rule / reason</th><th>Automata</th><th>Action</th></tr></thead><tbody id="findingRows"></tbody></table></div><div class="footer-note" style="padding:0 16px 14px">Each row is a regex actually extracted and analyzed. Repository coverage is limited to supported JavaScript/TypeScript regex assignments.</div></section>
+      </section>
+
+      <section class="view" id="view-history">
+        <div class="page-head"><div><div class="eyebrow">Local workspace / 04</div><h1>Scan history</h1><p class="lede">Review previous analyses, including date, time taken, risk signal, and automata counts. No login or account is required; history is stored locally in this browser.</p></div><div class="top-actions"><button class="btn" id="clearHistoryButton" type="button">Clear history</button><button class="btn btn-primary" data-go="workbench">New analysis</button></div></div>
+        <div class="history-summary"><div class="history-metric"><div class="label">Saved scans</div><div class="number" id="historyTotal">0</div><div class="note">This browser only</div></div><div class="history-metric"><div class="label">Potential risk signals</div><div class="number" id="historyRisks">0</div><div class="note">High + moderate</div></div><div class="history-metric"><div class="label">Average analysis time</div><div class="number" id="historyAverage">—</div><div class="note">Local processing time</div></div><div class="history-metric"><div class="label">Verified rewrites</div><div class="number" id="historyRepairs">0</div><div class="note">Current app session</div></div></div>
+        <section class="panel"><div class="panel-head"><div><div class="panel-title">Previous analysis runs</div><div class="small muted" style="margin-top:5px">Restore a run to review its pattern and regenerate the automata.</div></div><span class="pill" id="historyRetention">LOCAL · UP TO 40 RUNS</span></div><div class="table-wrap"><table><thead><tr><th>Date & time</th><th>Input</th><th>Assessment</th><th>Duration</th><th>NFA / DFA / Min</th><th>Action</th></tr></thead><tbody id="historyRows"></tbody></table></div><div class="footer-note" style="padding:0 16px 14px">History stays in this browser's local storage. It is not synced to an account or sent to a server.</div></section>
+      </section>
+
+      <section class="view" id="view-taint">
+        <div class="page-head"><div><div class="eyebrow">Data-flow analysis / 04</div><h1>Taint flow explorer</h1><p class="lede">Trace a simple request-input variable through assignments toward a regex match call. This is a small educational demonstration, not a complete JavaScript static analyzer.</p></div><div class="top-actions"><span class="pill amber">LIMITED ANALYSIS</span></div></div>
+        <div class="split"><section class="panel"><div class="panel-head"><div class="panel-title">Sample source</div><button class="btn btn-small" id="resetTaint">Load example</button></div><div class="panel-body"><div class="form-field"><label for="taintCode">JavaScript-like sample code</label><textarea id="taintCode" class="field mono" rows="10" style="line-height:1.8;resize:vertical">const userInput = req.query.name;\nconst normalized = userInput.trim();\nconst pattern = /(a+)+$/;\npattern.test(normalized);</textarea></div><div class="status-note" style="margin-top:12px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-8h.1"/></svg><span>Recognizes simple variable assignments, common request sources, regex literals assigned to variables, and direct `.test()` / `.match()` sink calls. Complex aliases and interprocedural calls are not fully analyzed.</span></div><button id="runTaint" class="btn btn-primary" style="width:100%;margin-top:13px">Trace data flow</button></div></section><section class="panel"><div class="panel-head"><div class="panel-title">Source → propagation → sink</div><span class="pill" id="taintStatus">NOT RUN</span></div><div class="panel-body"><div id="taintGraph"><div class="empty-state">Run the flow analysis to display a trace.</div></div><div id="taintSummary" class="status-note" style="margin-top:14px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3 22 20H2L12 3Z"/></svg><span>Results will appear here. A confirmed variable path is a reachability demonstration, not proof the regex is exploitable.</span></div></div></section></div>
+      </section>
+
+      <section class="view" id="view-repair">
+        <div class="page-head"><div><div class="eyebrow">Automated remediation / 05</div><h1>Repair Execution</h1><p class="lede">Review source changes generated from the current scan. SafeScan applies only supported replacements that pass its language-equivalence check, and packages corrected copies without overwriting your originals.</p></div><div class="top-actions"><span class="pill teal">AUTOMATED REPAIR</span></div></div>
+        <div class="history-summary"><div class="history-metric"><div class="label">Files in scan</div><div class="number" id="repairFilesCount">0</div><div class="note">Uploaded or pasted source</div></div><div class="history-metric"><div class="label">Regex patterns reviewed</div><div class="number" id="repairPatternsCount">0</div><div class="note">Across loaded files</div></div><div class="history-metric"><div class="label">Verified edits ready</div><div class="number" id="repairEditsCount">0</div><div class="note">Equivalence checked internally</div></div><div class="history-metric"><div class="label">Risky patterns not changed</div><div class="number" id="repairUnfixedCount">0</div><div class="note">No safe supported edit found</div></div></div>
+        <section class="panel"><div class="panel-head"><div><div class="panel-title">Source → corrected source</div><div class="small muted" style="margin-top:5px">Choose a file to inspect its exact code and proposed edits.</div></div><select class="field mono" id="repairTargetSelect" aria-label="Select file for repair" style="max-width:50%"><option value="">No source files analyzed</option></select></div>
+          <div class="panel-body"><div class="source-repair-grid"><div class="source-code-box"><label for="repairExecutionOriginal">Original source <span class="pill">UNCHANGED</span></label><textarea id="repairExecutionOriginal" class="field mono" rows="14" readonly spellcheck="false"></textarea></div><div class="source-code-box"><label for="repairExecutionCorrected">Corrected source <span class="pill teal" id="repairExecutionBadge">PREVIEW</span></label><textarea id="repairExecutionCorrected" class="field mono" rows="14" readonly spellcheck="false"></textarea></div></div>
+          <div class="status-note" id="repairExecutionNote" style="margin-top:12px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-8h.1"/></svg><span>Run a source-code scan first. Verified changes are applied only to the generated copy.</span></div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="btn" id="refreshRepairResults" type="button">Refresh repair suggestions</button><button class="btn" id="downloadSelectedRepair" type="button" disabled>Download selected file</button><button class="btn btn-primary" id="downloadRepairBundle" type="button" disabled>Download repaired bundle (.zip)</button></div></div>
+        </section>
+        <section class="panel" style="margin-top:16px"><div class="panel-head"><div class="panel-title">Repair actions by finding</div><span class="pill">CURRENT SCAN</span></div><div class="table-wrap"><table><thead><tr><th>File / line</th><th>Pattern</th><th>Detected issue</th><th>Repair action</th><th>Language check</th></tr></thead><tbody id="repairResultsRows"></tbody></table></div></section>
+        <div class="status-note" style="margin-top:14px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-8h.1"/></svg><span>Repair is restricted to recognized patterns and the prototype's ASCII regex grammar. Other code stays unchanged and is listed for review. A verified language-equivalent replacement does not by itself prove that every runtime behavior or regex flag is identical.</span></div>
+      </section>
+      <div class="hidden" aria-hidden="true"><input id="repairOriginal" value="^(a+)+$"><input id="repairCandidate" value="^a+$"><button id="verifyRepair" type="button"></button><span id="repairStatus"></span><div id="repairOutput"></div></div>
+
+      <section class="view" id="view-architecture">
+        <div class="page-head"><div><div class="eyebrow">System design / 06</div><h1>Project architecture</h1><p class="lede">SafeScan connects compiler-front-end ideas and automata algorithms to a focused ReDoS analysis workflow.</p></div><span class="pill teal">COURSE PROJECT</span></div>
+        <div class="info-grid"><div class="panel info-card"><div class="info-number">01 / COMPILER DESIGN</div><h3>Parse and extract</h3><p>A restricted regex parser creates an abstract syntax tree. Source mode extracts a limited set of regex literals from JavaScript-like code and reports matched patterns.</p></div><div class="panel info-card"><div class="info-number">02 / AUTOMATA THEORY</div><h3>Build state machines</h3><p>Thompson's construction creates an ε-NFA. Subset construction generates a DFA. Partition refinement produces a smaller equivalent DFA.</p></div><div class="panel info-card"><div class="info-number">03 / SECURITY ANALYSIS</div><h3>Flag and verify</h3><p>Structural heuristics flag suspicious nested repetition and ambiguous repeated alternatives. Equivalence checks compare supported regex languages before a repair can be marked equivalent.</p></div></div>
+        <section class="panel" style="margin-top:16px"><div class="panel-head"><div class="panel-title">Processing pipeline</div><span class="pill">IMPLEMENTATION MAP</span></div><div class="panel-body"><div class="pipeline-list"><div class="pipeline-item"><div class="pipeline-num">01</div><div class="pipeline-desc"><strong>Source input / Regex input</strong><p>Accept one regex directly, or search a restricted source snippet for regex literals.</p></div><span class="pill green">Implemented</span></div><div class="pipeline-item"><div class="pipeline-num">02</div><div class="pipeline-desc"><strong>Regex parser and AST</strong><p>Supports literals, grouping, alternation, character classes, dot, and *, +, ? quantifiers; unsupported syntax returns a clear error.</p></div><span class="pill green">Implemented</span></div><div class="pipeline-item"><div class="pipeline-num">03</div><div class="pipeline-desc"><strong>Thompson ε-NFA and subset DFA</strong><p>Generates state transitions from the parsed expression and simulates full-string acceptance over ASCII.</p></div><span class="pill green">Implemented</span></div><div class="pipeline-item"><div class="pipeline-num">04</div><div class="pipeline-desc"><strong>DFA minimization</strong><p>Uses iterative partition refinement to merge indistinguishable states.</p></div><span class="pill green">Implemented</span></div><div class="pipeline-item"><div class="pipeline-num">05</div><div class="pipeline-desc"><strong>ReDoS pattern heuristics</strong><p>Flags selected structural warning signs. A finding is not a measured runtime result or universal proof of exploitability.</p></div><span class="pill amber">Heuristic</span></div><div class="pipeline-item"><div class="pipeline-num">06</div><div class="pipeline-desc"><strong>Taint flow demo</strong><p>Traces simple source-to-sink paths through basic assignments and regex calls. It is not a complete AST-based interprocedural analysis.</p></div><span class="pill amber">Limited</span></div><div class="pipeline-item"><div class="pipeline-num">07</div><div class="pipeline-desc"><strong>Language-equivalence checker</strong><p>Uses product-DFA traversal to find a counterexample or establish equivalence within the implemented grammar and alphabet.</p></div><span class="pill green">Implemented</span></div><div class="pipeline-item"><div class="pipeline-num">08</div><div class="pipeline-desc"><strong>Reports and evidence</strong><p>Displays current-session results and exports a JSON report.</p></div><span class="pill green">Implemented</span></div></div></div></section>
+        <div class="status-note" style="margin-top:14px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3 22 20H2L12 3Z"/></svg><span><strong style="color:var(--text)">Scope note:</strong> This browser prototype does not implement a complete JavaScript compiler, repository-wide call graph, industrial-grade taint analysis, exhaustive ReDoS detector, or general-purpose automatic repair synthesizer. Those are extensions for the full proposal.</span></div>
+      </section>
+    </div>
+  </main>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+(function(){
+'use strict';
+const $ = (id) => document.getElementById(id);
+const alphabet = Array.from({length:128},(_,i)=>String.fromCharCode(i));
+const ALL = new Set(alphabet);
+const ESCAPE_SETS = {
+  d: new Set(Array.from('0123456789')),
+  w: new Set(Array.from('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_')),
+  s: new Set([' ','\t','\n','\r','\f','\v'])
+};
+const defaultSource = 'const userInput = req.query.name;\nconst normalized = userInput.trim();\nconst pattern = /(a+)+$/;\npattern.test(normalized);';
+ const state = { mode:'regex', graph:'nfa', current:null, findings:[], runs:0, verified:0, currentSource:'', taint:null, step:null, lastEquivalence:null, selectedState:null, animation:null, animationTimer:null, history:[], sourceFileName:'', correctedSource:'', sourceRepairReady:false, suppressHistory:false };
+const names = {workbench:'Analysis Workbench',automata:'Automata Lab',findings:'Findings',history:'Scan History',taint:'Taint Flow',repair:'Repair Verification',architecture:'Project Architecture'};
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function toast(message){const el=$('toast');el.textContent=message;el.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.classList.remove('show'),2800);}
+function iconSvg(kind){const common='fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"';const d={alert:'<path d="M12 3 22 20H2L12 3Z"/><path d="M12 9v5m0 3v.1"/>',check:'<path d="m5 12 4 4L19 6"/>',info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-8h.1"/>',scan:'<path d="M3 8V4h4M17 4h4v4M21 16v4h-4M7 20H3v-4M7 12h10"/>'};return `<svg width="18" height="18" viewBox="0 0 24 24" ${common}>${d[kind]||d.info}</svg>`;}
+function stripAnchors(p){let s=p;if(s.startsWith('^'))s=s.slice(1);if(s.endsWith('$')&&!isEscaped(s,s.length-1))s=s.slice(0,-1);return s;}
+function isEscaped(s,index){let n=0;for(let i=index-1;i>=0&&s[i]==='\\';i--)n++;return n%2===1;}
+class Parser {
+ constructor(source){this.source=stripAnchors(source);this.i=0;if(this.source.length>240)throw new Error('Pattern is too long for this prototype (limit: 240 characters).');}
+ peek(){return this.source[this.i];}
+ eat(){return this.source[this.i++];}
+ parse(){const ast=this.alt();if(this.i<this.source.length)throw new Error(`Unexpected token “${this.peek()}” at position ${this.i+1}.`);return ast;}
+ alt(){const branches=[this.concat()];while(this.peek()==='|'){this.eat();branches.push(this.concat());}return branches.length===1?branches[0]:{type:'alt',children:branches};}
+ concat(){const nodes=[];while(this.i<this.source.length&&this.peek()!==')'&&this.peek()!=='|')nodes.push(this.repeat());if(nodes.length===0)return {type:'eps'};return nodes.length===1?nodes[0]:{type:'concat',children:nodes};}
+ repeat(){let node=this.atom();while(['*','+','?'].includes(this.peek())){const kind=this.eat();if(node.type==='repeat')throw new Error('Repeated quantifiers like ** or ++ are not supported.');node={type:'repeat',kind,child:node};}if(this.peek()==='{')throw new Error('Bounded quantifiers such as {2,4} are not supported in this prototype yet.');return node;}
+ atom(){const c=this.eat();if(c===undefined)throw new Error('Unexpected end of pattern.');if(c==='('){const n=this.alt();if(this.peek()!==')')throw new Error('Missing closing parenthesis.');this.eat();return {type:'group',child:n};}if(c==='[')return {type:'set',chars:this.charClass()};if(c==='.')return {type:'set',chars:new Set(alphabet.filter(ch=>ch!=='\n'&&ch!=='\r'))};if(c==='\\')return {type:'set',chars:this.escapeSet()};if(')*+?{}]'.includes(c))throw new Error(`Unexpected operator “${c}” at position ${this.i}.`);if(c.charCodeAt(0)>127)throw new Error('Only ASCII characters are supported in this prototype.');return {type:'set',chars:new Set([c])};}
+ escapeSet(){if(this.i>=this.source.length)throw new Error('Trailing escape character.');const c=this.eat();if(c==='n')return new Set(['\n']);if(c==='r')return new Set(['\r']);if(c==='t')return new Set(['\t']);if(c==='f')return new Set(['\f']);if(c==='v')return new Set(['\v']);if(c==='d'||c==='w'||c==='s')return new Set(ESCAPE_SETS[c]);if(c==='D'||c==='W'||c==='S'){const set=new Set(ESCAPE_SETS[c.toLowerCase()]);return new Set(alphabet.filter(x=>!set.has(x)));}if(/[1-9]/.test(c))throw new Error('Backreferences are outside the supported regular-language subset.');if(c.charCodeAt(0)>127)throw new Error('Only ASCII escapes are supported.');return new Set([c]);}
+ readClassAtom(){let c=this.eat();if(c==='\\'){const chars=this.escapeSet();return {chars,single:chars.size===1?[...chars][0]:null};}if(c===undefined)throw new Error('Unclosed character class.');if(c.charCodeAt(0)>127)throw new Error('Only ASCII character classes are supported.');return {chars:new Set([c]),single:c};}
+ charClass(){let neg=false;if(this.peek()==='^'){neg=true;this.eat();}const chars=new Set();let has=false;while(this.i<this.source.length&&this.peek()!==']'){const left=this.readClassAtom();has=true;if(this.peek()==='-'&&this.i+1<this.source.length&&this.source[this.i+1]!==']'){this.eat();const right=this.readClassAtom();if(left.single===null||right.single===null)throw new Error('Character-class ranges require single literal endpoints.');const a=left.single.charCodeAt(0),b=right.single.charCodeAt(0);if(a>b)throw new Error('Character-class range is reversed.');for(let k=a;k<=b;k++)chars.add(String.fromCharCode(k));}else left.chars.forEach(x=>chars.add(x));}if(this.peek()!==']')throw new Error('Unclosed character class.');this.eat();if(!has)throw new Error('Empty character classes are not supported.');return neg?new Set(alphabet.filter(ch=>!chars.has(ch))):chars;}
+}
+function astText(n){if(n.type==='eps')return 'ε';if(n.type==='set')return compactSet(n.chars);if(n.type==='group')return '('+astText(n.child)+')';if(n.type==='concat')return n.children.map(astText).join(' · ');if(n.type==='alt')return n.children.map(astText).join(' | ');if(n.type==='repeat')return '('+astText(n.child)+')'+n.kind;return '?';}
+function compactSet(chars){const a=[...chars].sort((x,y)=>x.charCodeAt(0)-y.charCodeAt(0));if(a.length===0)return '∅';if(a.length===128)return 'ANY';if(a.length===10&&a.join('')==='0123456789')return '\\d';if(a.length===63&&chars.has('_'))return '\\w';if(a.length>16){const groups=[];let st=a[0],pr=a[0];for(let i=1;i<=a.length;i++){const x=a[i];if(x&&x.charCodeAt(0)===pr.charCodeAt(0)+1){pr=x;continue;}groups.push(st===pr?prettyChar(st):prettyChar(st)+'-'+prettyChar(pr));st=x;pr=x;}return '['+groups.join('')+']';}return a.length===1?prettyChar(a[0]):'['+a.map(prettyChar).join('')+']';}
+function prettyChar(c){return ({'\n':'\\n','\r':'\\r','\t':'\\t',' ':'␠','ε':'ε'})[c]||(['[',']','-','\\','^'].includes(c)?'\\'+c:c);}
+function nfaFromAst(ast){let id=0;const edges=[];function st(){return id++;}function eps(a,b){edges.push({from:a,to:b,chars:null});}function chars(a,b,set){edges.push({from:a,to:b,chars:new Set(set)});}function build(n){if(n.type==='group')return build(n.child);if(n.type==='eps'){const s=st(),e=st();eps(s,e);return {start:s,end:e};}if(n.type==='set'){const s=st(),e=st();chars(s,e,n.chars);return {start:s,end:e};}if(n.type==='concat'){const parts=n.children.map(build);for(let i=0;i<parts.length-1;i++)eps(parts[i].end,parts[i+1].start);return {start:parts[0].start,end:parts[parts.length-1].end};}if(n.type==='alt'){const s=st(),e=st();for(const child of n.children){const p=build(child);eps(s,p.start);eps(p.end,e);}return {start:s,end:e};}if(n.type==='repeat'){const p=build(n.child),s=st(),e=st();eps(s,p.start);eps(p.end,e);if(n.kind==='*'||n.kind==='?')eps(s,e);if(n.kind==='*'||n.kind==='+')eps(p.end,p.start);return {start:s,end:e};}throw new Error('Unsupported AST node.');}const f=build(ast);if(id>220)throw new Error('Regex expands to too many NFA states for this prototype.');const order=[],seen=new Set([f.start]),queue=[f.start];while(queue.length){const current=queue.shift();order.push(current);for(const edge of edges)if(edge.from===current&&!seen.has(edge.to)){seen.add(edge.to);queue.push(edge.to);}}for(let old=0;old<id;old++)if(!seen.has(old))order.push(old);const remap=new Map(order.map((old,index)=>[old,index]));return {states:order.map((_,index)=>index),start:remap.get(f.start),accept:remap.get(f.end),edges:edges.map(edge=>({...edge,from:remap.get(edge.from),to:remap.get(edge.to)}))};}
+function containsRepeat(n){if(n.type==='repeat')return true;if(n.type==='group')return containsRepeat(n.child);return (n.children||[]).some(containsRepeat);}
+function nullable(n){if(n.type==='eps')return true;if(n.type==='set')return false;if(n.type==='group')return nullable(n.child);if(n.type==='repeat')return n.kind==='*'||n.kind==='?'||nullable(n.child);if(n.type==='alt')return n.children.some(nullable);if(n.type==='concat')return n.children.every(nullable);return false;}
+function firstChars(n){if(n.type==='set')return new Set(n.chars);if(n.type==='eps')return new Set();if(n.type==='group'||n.type==='repeat')return firstChars(n.child);if(n.type==='alt'){const s=new Set();n.children.forEach(c=>firstChars(c).forEach(x=>s.add(x)));return s;}if(n.type==='concat'){const s=new Set();for(const c of n.children){firstChars(c).forEach(x=>s.add(x));if(!nullable(c))break;}return s;}return new Set();}
+function overlapsRepeatedAlt(n,inRepeat=false){if(n.type==='repeat'){if(containsOverlapAlt(n.child))return true;return overlapsRepeatedAlt(n.child,true);}if(n.type==='group')return overlapsRepeatedAlt(n.child,inRepeat);return (n.children||[]).some(c=>overlapsRepeatedAlt(c,inRepeat));}
+function containsOverlapAlt(n){if(n.type==='alt'){for(let i=0;i<n.children.length;i++){const a=firstChars(n.children[i]);for(let j=i+1;j<n.children.length;j++){const b=firstChars(n.children[j]);for(const ch of a)if(b.has(ch))return true;}}}if(n.type==='group'||n.type==='repeat')return containsOverlapAlt(n.child);return (n.children||[]).some(containsOverlapAlt);}
+function assess(n,pattern){function nested(x){if(x.type==='repeat'&&containsRepeat(x.child))return true;if(x.type==='group')return nested(x.child);return (x.children||[]).some(nested);}const hasNested=nested(n);const hasOverlap=overlapsRepeatedAlt(n);if(hasNested)return {level:'risk',severity:'HIGH RISK',title:'Potential ReDoS risk',subtitle:'Nested repetition heuristic',rule:'NESTED_QUANTIFIER',explanation:'A repeated expression contains another repetition. Certain backtracking regex engines can explore many equivalent ways to partition a failing input, which can cause excessive processing time.',evidence:'Nested quantifiers were found in the parsed expression. This is a structural warning only; runtime complexity depends on the target engine and context.'};if(hasOverlap)return {level:'risk',severity:'MODERATE RISK',title:'Potential ambiguity risk',subtitle:'Repeated alternatives overlap',rule:'OVERLAPPING_ALTERNATION',explanation:'A repeated alternation has branches with overlapping initial characters. Some backtracking engines may need to reconsider multiple paths on a failing input.',evidence:'Overlapping first-character sets were found inside a repeated expression. This is a heuristic and does not prove a denial-of-service vulnerability.'};return {level:'clear',severity:'NO KNOWN SIGNAL',title:'No known risk pattern flagged',subtitle:'Limited heuristic checks passed',rule:'NO_KNOWN_PATTERN',explanation:'The prototype did not detect nested quantification or repeated ambiguous alternatives in the supported syntax.',evidence:'No current heuristic rule matched. This does not prove the regex is safe or efficient in every engine.'};}
+function epsilonClosure(seed,nfa){const seen=new Set(seed),stack=[...seed];while(stack.length){const s=stack.pop();for(const e of nfa.edges){if(e.from===s&&e.chars===null&&!seen.has(e.to)){seen.add(e.to);stack.push(e.to);}}}return seen;}
+function nfaMove(set,ch,nfa){const out=new Set();for(const e of nfa.edges)if(set.has(e.from)&&e.chars!==null&&e.chars.has(ch))out.add(e.to);return out;}
+function subsetDfa(nfa){const start=epsilonClosure([nfa.start],nfa);const keyOf=s=>[...s].sort((a,b)=>a-b).join(',');const sets=[start],map=new Map([[keyOf(start),0]]),trans=[],accept=new Set(),queue=[0];while(queue.length){const id=queue.shift(),set=sets[id];const row=new Map();for(const ch of alphabet){const dest=epsilonClosure(nfaMove(set,ch,nfa),nfa),key=keyOf(dest);let target=map.get(key);if(target===undefined){target=sets.length;if(target>=100)throw new Error('DFA state limit reached (100). Try a simpler pattern.');map.set(key,target);sets.push(dest);queue.push(target);}row.set(ch,target);}trans[id]=row;if(set.has(nfa.accept))accept.add(id);}return {states:sets.map((_,i)=>i),start:0,accept,trans,subsets:sets};}
+function minimizeDfa(dfa){let partitions=[];const yes=dfa.states.filter(s=>dfa.accept.has(s)),no=dfa.states.filter(s=>!dfa.accept.has(s));if(yes.length)partitions.push(yes);if(no.length)partitions.push(no);let changed=true;let loops=0;while(changed&&loops++<100){changed=false;const groupOf=new Map();partitions.forEach((g,i)=>g.forEach(s=>groupOf.set(s,i)));const next=[];for(const group of partitions){const buckets=new Map();for(const s of group){const sig=alphabet.map(ch=>groupOf.get(dfa.trans[s].get(ch))).join(',');if(!buckets.has(sig))buckets.set(sig,[]);buckets.get(sig).push(s);}if(buckets.size>1)changed=true;next.push(...buckets.values());}partitions=next;}const groupOf=new Map();partitions.forEach((g,i)=>g.forEach(s=>groupOf.set(s,i)));const trans=partitions.map(g=>{const rep=g[0],m=new Map();for(const ch of alphabet)m.set(ch,groupOf.get(dfa.trans[rep].get(ch)));return m;});return {states:partitions.map((_,i)=>i),start:groupOf.get(dfa.start),accept:new Set(dfa.states.filter(s=>dfa.accept.has(s)).map(s=>groupOf.get(s))),trans,partitions};}
+function analyzePattern(pattern){const ast=new Parser(pattern).parse();const nfa=nfaFromAst(ast);const dfa=subsetDfa(nfa);const min=minimizeDfa(dfa);const risk=assess(ast,pattern);return {pattern,ast,nfa,dfa,min,risk,astLabel:astText(ast),timestamp:new Date().toISOString()};}
+function runOnDfa(dfa,str){let current=dfa.start,path=[current];for(const ch of str){const code=ch.charCodeAt(0);if(code>127)return {accepted:false,path,failed:ch,error:'Non-ASCII characters are outside the prototype alphabet.'};current=dfa.trans[current]?.get(ch);if(current===undefined)return {accepted:false,path,failed:ch};path.push(current);}return {accepted:dfa.accept.has(current),path,final:current};}
+function equivalence(a,b){const start=[a.start,b.start],key=p=>p[0]+','+p[1],q=[start],seen=new Map([[key(start),null]]);let mismatch=null;while(q.length){const [x,y]=q.shift();if(a.accept.has(x)!==b.accept.has(y)){mismatch=[x,y];break;}for(const ch of alphabet){const nx=a.trans[x].get(ch),ny=b.trans[y].get(ch),k=key([nx,ny]);if(!seen.has(k)){seen.set(k,{prev:key([x,y]),ch});q.push([nx,ny]);}}}if(!mismatch)return {equivalent:true,checked:seen.size};let k=key(mismatch),chars=[];while(seen.get(k)){const step=seen.get(k);chars.push(step.ch);k=step.prev;}chars.reverse();return {equivalent:false,counterexample:chars.join(''),checked:seen.size};}
+function sourceRegexes(code){const out=[];const re=/\b(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*\/((?:\\.|[^/\\])*)\/([dgimsuvy]*)/g;let m;while((m=re.exec(code))!==null){const equals=m[0].indexOf('=');const open=m[0].indexOf('/',equals+1);const start=m.index+open+1;out.push({variable:m[1],pattern:m[2],index:m.index,flags:m[3],patternStart:start,patternEnd:start+m[2].length});}return out;}
+function graphLabels(edges,kind){const groups=new Map();for(const e of edges){const key=e.from+'-'+e.to;if(!groups.has(key))groups.set(key,{from:e.from,to:e.to,chars:[]});groups.get(key).chars.push(e.chars===null?'ε':e.chars);}return [...groups.values()].map(g=>({...g,label:g.chars.every(x=>x==='ε')?'ε':g.chars.map(x=>x==='ε'?'ε':compactSet(x)).join(', ')}));}
+function renderGraph(type){if(!state.current){$('graphWrap').innerHTML='<div class="empty-state">Run a supported pattern to generate an automaton.</div>';return;}const cur=state.current;let nodes,edges,start,accept,labels,transCount;if(type==='nfa'){nodes=cur.nfa.states;start=cur.nfa.start;accept=new Set([cur.nfa.accept]);edges=graphLabels(cur.nfa.edges,'nfa').map(e=>({...e,raw:e.chars}));transCount=cur.nfa.edges.length;$('graphSubtitle').textContent='ε-NFA created by Thompson’s construction. Epsilon transitions are shown as ε.';}else{const dfa=type==='min'?cur.min:cur.dfa;nodes=dfa.states;start=dfa.start;accept=dfa.accept;edges=[];for(const s of nodes){const groups=new Map();for(const [ch,to] of dfa.trans[s]){if(!groups.has(to))groups.set(to,new Set());groups.get(to).add(ch);}for(const [to,chars] of groups)edges.push({from:s,to,label:compactSet(chars)});}transCount=edges.length;$('graphSubtitle').textContent=type==='min'?'Minimal DFA after partition refinement.':'DFA generated by subset construction.';}
+ $('transitionCount').textContent=transCount+' transitions';
+ if(nodes.length>32){$('graphWrap').innerHTML='<div class="empty-state">This expression produces '+nodes.length+' states. Use the transition table below for this larger graph.</div>';renderTransitions(type);return;}
+ const cols=Math.min(5,Math.max(2,Math.ceil(Math.sqrt(nodes.length*1.35)))),rows=Math.ceil(nodes.length/cols),sx=84,sy=75,dx=150,dy=130,W=cols*dx+35,H=rows*dy+38,xy=new Map();nodes.forEach((n,i)=>xy.set(n,{x:sx+(i%cols)*dx,y:sy+Math.floor(i/cols)*dy}));
+ let svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${type} state-transition diagram"><defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#6f8797"/></marker></defs><rect width="100%" height="100%" fill="transparent"/>`;
+  for(const e of edges){const a=xy.get(e.from),b=xy.get(e.to);if(!a||!b)continue;let d,labelX,labelY;if(e.from===e.to){d=`M ${a.x-9} ${a.y-23} C ${a.x-42} ${a.y-58}, ${a.x+42} ${a.y-58}, ${a.x+9} ${a.y-23}`;labelX=a.x;labelY=a.y-55;}else{const offset=((e.from+e.to)%2?10:-10);const midX=(a.x+b.x)/2+offset,midY=(a.y+b.y)/2-9;d=`M ${a.x+ (b.x>=a.x?18:-18)} ${a.y+ (b.y===a.y?0:(b.y>a.y?10:-10))} Q ${midX} ${midY} ${b.x+(b.x>=a.x?-20:20)} ${b.y+(b.y===a.y?0:(b.y>a.y?-9:9))}`;labelX=midX;labelY=midY-5;}svg+=`<path class="automata-edge" data-from="${e.from}" data-to="${e.to}" data-label="${esc(e.label)}" d="${d}" stroke="#6f8797" stroke-width="1.25" fill="none" marker-end="url(#arrow)"/>`;const lab=String(e.label).length>16?String(e.label).slice(0,14)+'…':e.label;svg+=`<text x="${labelX}" y="${labelY}" text-anchor="middle" font-size="10" font-family="ui-monospace, monospace" fill="${getComputedStyle(document.documentElement).getPropertyValue('--muted').trim()||'#8fa2b1'}">${esc(lab)}</text>`;}
+ const sp=xy.get(start);svg+=`<path d="M ${sp.x-44} ${sp.y} L ${sp.x-24} ${sp.y}" stroke="#36d6c5" stroke-width="1.7" marker-end="url(#arrow)"/>`;
+  for(const n of nodes){const p=xy.get(n);let fill=n===start?'#10332f':(accept.has(n)?'#1b2942':'#141f29');let stroke=n===start?'#36d6c5':(accept.has(n)?'#83aaff':'#415463');svg+=`<g class="automata-node" data-state="${n}" tabindex="0" role="button" aria-label="Select state ${type==='nfa'?'q':'D'}${n}"><circle cx="${p.x}" cy="${p.y}" r="22" fill="${fill}" stroke="${stroke}" stroke-width="1.6"/>`;if(accept.has(n))svg+=`<circle cx="${p.x}" cy="${p.y}" r="17" fill="none" stroke="${stroke}" stroke-width="1"/>`;svg+=`<text x="${p.x}" y="${p.y+4}" text-anchor="middle" font-family="ui-monospace, monospace" font-size="11" font-weight="700" fill="#edf3f7">${type==='nfa'?'q':'D'}${n}</text></g>`;}
+  svg+='</svg>'; $('graphWrap').innerHTML=svg;renderTransitions(type);bindGraphInteractions(type);selectAutomataState(start,type);$('walkStatus').textContent=`${type==='nfa'?'ε-NFA':type==='min'?'Minimal DFA':'DFA'} graph ready. Click a state or animate an input string.`;$('walkStepTrack').innerHTML='<span class="walk-frame">Waiting for animation</span>';
+}
+ function renderTransitions(type){const cur=state.current;if(!cur)return;let items=[];const prefix=type==='nfa'?'q':'D';if(type==='nfa'){items=cur.nfa.edges.map(e=>({from:e.from,label:e.chars===null?'ε':compactSet(e.chars),to:e.to}));}else{const dfa=type==='min'?cur.min:cur.dfa;for(const s of dfa.states){const groups=new Map();for(const [ch,to] of dfa.trans[s]){if(!groups.has(to))groups.set(to,new Set());groups.get(to).add(ch);}for(const [to,chars] of groups)items.push({from:s,label:compactSet(chars),to});}}$('transitionList').innerHTML=items.slice(0,160).map(e=>`<div class="transition-row"><span>${prefix}${e.from}</span><span>${esc(e.label)}</span><span>${prefix}${e.to}</span></div>`).join('')+(items.length>160?`<div class="small muted" style="padding:10px 0">Showing first 160 of ${items.length} transitions.</div>`:'');}
+function automataMeta(type){if(!state.current)return null;const cur=state.current;if(type==='nfa')return {prefix:'q',states:cur.nfa.states,start:cur.nfa.start,accept:new Set([cur.nfa.accept]),edges:cur.nfa.edges.map(e=>({from:e.from,to:e.to,label:e.chars===null?'ε':compactSet(e.chars)})),nfa:cur.nfa};const machine=type==='min'?cur.min:cur.dfa,edges=[];for(const from of machine.states){const groups=new Map();for(const [ch,to] of machine.trans[from]){if(!groups.has(to))groups.set(to,new Set());groups.get(to).add(ch);}for(const [to,chars] of groups)edges.push({from,to,label:compactSet(chars)});}return {prefix:'D',states:machine.states,start:machine.start,accept:machine.accept,edges,machine};}
+function stopWalkTimer(){if(state.animationTimer!==null){clearInterval(state.animationTimer);state.animationTimer=null;}}
+function selectAutomataState(id,type){const meta=automataMeta(type);if(!meta)return;id=Number(id);state.selectedState=id;const svg=$('graphWrap').querySelector('svg');if(svg){svg.querySelectorAll('.automata-node').forEach(node=>node.classList.toggle('selected',Number(node.dataset.state)===id));svg.querySelectorAll('.automata-edge').forEach(edge=>edge.classList.toggle('outgoing',Number(edge.dataset.from)===id));}const role=id===meta.start?'Start state':meta.accept.has(id)?'Accepting state':'Intermediate state';$('selectedStateTitle').textContent=`${meta.prefix}${id} · ${role}`;const outgoing=meta.edges.filter(edge=>edge.from===id);$('selectedStateInfo').innerHTML=`<div><strong>${esc(meta.prefix+id)}</strong> is ${esc(role.toLowerCase())}.</div><div style="margin-top:7px">Outgoing transitions: <strong>${outgoing.length}</strong></div><div style="margin-top:6px">${outgoing.length?outgoing.map(edge=>`<div class="mono" style="padding:3px 0">${esc(edge.label)} → ${esc(meta.prefix+edge.to)}</div>`).join(''):'No outgoing transitions in this graph.'}</div>`;}
+function bindGraphInteractions(type){const svg=$('graphWrap').querySelector('svg');if(!svg)return;svg.querySelectorAll('.automata-node').forEach(node=>{node.addEventListener('click',()=>{stopWalkTimer();selectAutomataState(node.dataset.state,type);});node.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();stopWalkTimer();selectAutomataState(node.dataset.state,type);}});});}
+function makeWalkFrames(type,input){if([...input].some(ch=>ch.charCodeAt(0)>127))throw new Error('Animation supports ASCII input only.');const frames=[];if(type==='nfa'){const nfa=state.current.nfa;let active=epsilonClosure([nfa.start],nfa);frames.push({active:[...active].sort((a,b)=>a-b),symbol:'START',note:`Begin at q${nfa.start}; follow ε transitions to find the initial active-state set.`});for(const ch of input){const before=[...active];active=epsilonClosure(nfaMove(active,ch,nfa),nfa);frames.push({active:[...active].sort((a,b)=>a-b),from:before,symbol:prettyChar(ch),note:`Read “${prettyChar(ch)}”. Move along matching NFA transitions, then compute ε-closure; active states: ${active.size?[...active].sort((a,b)=>a-b).map(n=>'q'+n).join(', '):'∅'}.`});}frames[frames.length-1].final=active.has(nfa.accept);frames[frames.length-1].finalNote=frames[frames.length-1].final?'Input fully consumed; the NFA accept state is active.':'Input fully consumed; the NFA accept state is not active.';return frames;}const machine=type==='min'?state.current.min:state.current.dfa,prefix='D';let active=machine.start;frames.push({active:[active],symbol:'START',note:`Begin at ${prefix}${active}, the start state.`});for(const ch of input){const from=active;active=machine.trans[active].get(ch);frames.push({active:[active],from:[from],symbol:prettyChar(ch),note:`Read “${prettyChar(ch)}”: transition from ${prefix}${from} to ${prefix}${active}.`});}frames[frames.length-1].final=machine.accept.has(active);frames[frames.length-1].finalNote=frames[frames.length-1].final?'Input fully consumed; the final state is accepting.':'Input fully consumed; the final state is non-accepting, so the string is rejected.';return frames;}
+function renderWalkFrame(){const walk=state.animation;if(!walk)return;const index=walk.index,frame=walk.frames[index],meta=automataMeta(walk.type),svg=$('graphWrap').querySelector('svg');if(svg){svg.querySelectorAll('.automata-node').forEach(node=>node.classList.toggle('walk-active',frame.active.includes(Number(node.dataset.state))));svg.querySelectorAll('.automata-edge').forEach(edge=>edge.classList.toggle('walk-active',index>0&&frame.from&&frame.from.includes(Number(edge.dataset.from))&&frame.active.includes(Number(edge.dataset.to))));}const stateNames=frame.active.length?frame.active.map(n=>meta.prefix+n).join(', '):'∅ (no active states)';$('walkStatus').innerHTML=`<strong>Step ${index} of ${walk.frames.length-1} · ${esc(frame.symbol)}:</strong> ${esc(frame.note)}${frame.final!==undefined?` <strong>${frame.final?'ACCEPTED':'REJECTED'}.</strong> ${esc(frame.finalNote)}`:''}`;$('selectedStateTitle').textContent=frame.active.length===1?`${meta.prefix}${frame.active[0]} · Active state set`:'Active state set · '+frame.active.length+' states';$('selectedStateInfo').textContent=`Currently active: ${stateNames}. ${frame.final!==undefined?frame.finalNote:'Use Next transition to advance one input symbol.'}`;$('walkStepTrack').innerHTML=walk.frames.map((f,i)=>`<button class="walk-frame ${i===index?'active':''}" data-walk-index="${i}" type="button">${i===0?'START':`${esc(f.symbol)} → ${f.active.length?f.active.map(n=>meta.prefix+n).join(','):'∅'}`}</button>`).join('');$('walkStepTrack').querySelectorAll('[data-walk-index]').forEach(button=>button.addEventListener('click',()=>moveWalkTo(Number(button.dataset.walkIndex),true)));}
+function moveWalkTo(index,pause){if(!state.animation)return;if(pause)stopWalkTimer();state.animation.focusedEdge=null;state.selectedEdge=null;state.animation.index=Math.max(0,Math.min(index,state.animation.frames.length-1));renderWalkFrame();if(state.animation.index===state.animation.frames.length-1)stopWalkTimer();}
+function resetWalk(){stopWalkTimer();state.animation=null;const svg=$('graphWrap').querySelector('svg');if(svg){svg.querySelectorAll('.automata-node').forEach(node=>node.classList.remove('walk-active'));svg.querySelectorAll('.automata-edge').forEach(edge=>edge.classList.remove('walk-active'));}const meta=automataMeta(state.graph);$('walkStatus').textContent='Walkthrough reset. Select a state or animate the input string one transition at a time.';$('walkStepTrack').innerHTML='<span class="walk-frame">Waiting for animation</span>';if(meta)selectAutomataState(meta.start,state.graph);}
+function updateLines(){const text=$('sourceInput').value;const n=Math.max(1,text.split('\n').length);$('lineNumbers').textContent=Array.from({length:n},(_,i)=>i+1).join('\n');$('charCount').textContent=text.length+' chars';}
+function setInputMode(mode){state.mode=mode;document.querySelectorAll('#inputMode button').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));const input=$('sourceInput');if(mode==='regex'){if(!input.value.trim()||input.value===defaultSource)input.value='^(a+)+$';$('editorPrompt').textContent='Regex pattern';$('fileHint').textContent='pattern.regex';$('languagePill').textContent='REGEX';$('inputHint').textContent='Supported: literals, groups, |, *, +, ?, character classes';$('sampleChips').classList.remove('hidden');$('sourceFileTools').classList.add('hidden');$('sourceRepairPanel').classList.add('hidden');}else{if(!input.value.includes('req.query')&&!input.value.includes('pattern.test')&&!sourceRegexes(input.value).length)input.value=defaultSource;$('editorPrompt').textContent='JavaScript source (limited extraction)';$('fileHint').textContent=state.sourceFileName||'example.js';$('languagePill').textContent='JAVASCRIPT';$('inputHint').textContent='Finds supported regex literals in JavaScript-like source';$('sampleChips').classList.add('hidden');$('sourceFileTools').classList.remove('hidden');$('sourceRepairPanel').classList.remove('hidden');}updateLines();if(mode==='source')renderSourceRepair();}
+function chooseSample(which){state.mode='regex';setInputMode('regex');const vals={risk:'^(a+)+$',overlap:'^(a|aa)+$',safe:'^[a-z]+$'};$('sourceInput').value=vals[which]||vals.risk;updateLines();runAnalysis();}
+function runAnalysis(){const started=performance.now();const inputValue=$('sourceInput').value;const raw=state.mode==='source'?inputValue:inputValue.trim();if(!raw.trim()){toast('Enter a regex or source snippet first.');return;}let pattern=raw,sourceSummary=null;if(state.mode==='source'){const found=sourceRegexes(raw);if(!found.length){toast('No supported regex literal assigned to a variable was found. Try the provided sample.');renderSourceRepair();return;}pattern=found[0].pattern;sourceSummary=found;state.currentSource=raw;}try{const result=analyzePattern(pattern);result.sourceMode=state.mode==='source';result.sourceSummary=sourceSummary;result.input=raw;result.durationMs=Math.max(0,performance.now()-started);state.current=result;state.runs++;state.findings.unshift({id:Date.now()+Math.random(),pattern,assessment:result.risk,nfa:result.nfa.states.length,dfa:result.dfa.states.length,min:result.min.states.length,timestamp:result.timestamp,sourceMode:result.sourceMode,input:raw});if(!state.suppressHistory){state.history.unshift({id:Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7),timestamp:result.timestamp,durationMs:result.durationMs,mode:state.mode,input:raw,pattern:pattern,severity:result.risk.severity,rule:result.risk.rule,nfa:result.nfa.states.length,dfa:result.dfa.states.length,min:result.min.states.length,fileName:state.sourceFileName});state.history=state.history.slice(0,40);saveHistory();renderHistory();}renderCurrent();toast('Analysis complete · '+formatDuration(result.durationMs)+' · '+result.nfa.states.length+' NFA / '+result.dfa.states.length+' DFA states.');}catch(err){$('resultStatus').textContent='ERROR';$('verdictTitle').textContent='Analysis unavailable';$('verdictSub').textContent='The input is outside the supported grammar';$('riskCopy').textContent=err.message;$('severityPill').textContent='UNSUPPORTED';$('severityPill').className='pill amber';$('verdictIcon').className='verdict-icon warn';$('verdictIcon').innerHTML=iconSvg('info');$('evidenceCode').innerHTML='<div class=\"empty-state\">No automaton was produced for this input.</div>';$('evidenceNote').textContent='Unsupported syntax is reported explicitly; it is not silently ignored.';if(state.mode==='source')renderSourceRepair();toast(err.message);}}
+function renderCurrent(){const c=state.current,r=c.risk;$('resultStatus').textContent='ANALYZED';$('resultStatus').className='pill teal';$('verdictTitle').textContent=r.title;$('verdictSub').textContent=r.subtitle;$('riskCopy').textContent=r.explanation;$('severityPill').textContent=r.severity;$('severityPill').className='pill '+(r.level==='risk'?(r.rule==='NESTED_QUANTIFIER'?'red':'amber'):'green');$('verdictIcon').className='verdict-icon '+(r.level==='clear'?'safe':r.rule==='OVERLAPPING_ALTERNATION'?'warn':'');$('verdictIcon').innerHTML=iconSvg(r.level==='clear'?'check':r.rule==='OVERLAPPING_ALTERNATION'?'info':'alert');$('nfaMetric').textContent=c.nfa.states.length;$('dfaMetric').textContent=c.dfa.states.length;$('minMetric').textContent=c.min.states.length;$('navStates').textContent=c.min.states.length;$('navFindings').textContent=state.findings.filter(f=>f.assessment.level==='risk').length;$('lastRunLabel').textContent=(c.sourceMode?'Source snippet analyzed':'Regex analyzed')+' · '+new Date(c.timestamp).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});$('automataPatternPill').textContent='PATTERN: '+(c.pattern.length>22?c.pattern.slice(0,20)+'…':c.pattern);$('evidenceCode').innerHTML=`<div class="code-line"><span class="ln">01</span><span class="code">pattern = <span style="color:var(--accent)">${esc(c.pattern)}</span></span></div><div class="code-line"><span class="ln">02</span><span class="code">AST = <span style="color:var(--blue)">${esc(c.astLabel)}</span></span></div><div class="code-line"><span class="ln">03</span><span class="code">rule = ${esc(r.rule)}</span></div><div class="code-line"><span class="ln">04</span><span class="code">NFA ${c.nfa.states.length} states → DFA ${c.dfa.states.length} → minimized ${c.min.states.length}</span></div>`;$('evidenceNote').textContent=r.evidence;$('findTotal').textContent=state.findings.length;$('findRisk').textContent=state.findings.filter(f=>f.assessment.level==='risk').length;$('findStates').textContent=c.min.states.length;$('findVerified').textContent=state.verified;$('findingRows').innerHTML='';renderFindings();renderGraph(state.graph);$('pipelineProgress').textContent='5 core stages completed';}
+function renderFindings(){const q=($('findingSearch')?.value||'').toLowerCase();const filt=$('findingFilter')?.value||'all';const list=state.findings.filter(f=>(f.pattern.toLowerCase().includes(q)||f.assessment.rule.toLowerCase().includes(q))&&(filt==='all'||(filt==='risk'&&f.assessment.level==='risk')||(filt==='clear'&&f.assessment.level==='clear')||(filt==='error'&&f.assessment.level==='error')));$('findingRows').innerHTML=list.map(f=>`<tr><td><code>${esc(f.pattern)}</code>${f.sourceMode?'<div class="small muted" style="margin-top:4px">Extracted from source snippet</div>':''}</td><td><span class="pill ${f.assessment.level==='risk'?(f.assessment.rule==='NESTED_QUANTIFIER'?'red':'amber'):'green'}">${esc(f.assessment.severity)}</span></td><td><div>${esc(f.assessment.rule)}</div><div class="small muted" style="margin-top:3px">${esc(f.assessment.subtitle)}</div></td><td><span class="mono">${f.nfa} / ${f.dfa} / ${f.min}</span><div class="small muted">NFA / DFA / Min</div></td><td><button class="btn btn-small" data-finding="${String(f.id)}">Inspect ↗</button></td></tr>`).join('')||'<tr><td colspan="5"><div class="empty-state">No findings match this filter.</div></td></tr>';}
+function updateRiskBreakdown(){const items=state.findings;$('countHigh').textContent=items.filter(f=>f.assessment.severity==='HIGH RISK').length;$('countModerate').textContent=items.filter(f=>f.assessment.severity==='MODERATE RISK').length;$('countLow').textContent=items.filter(f=>f.assessment.level==='clear').length;}
+const renderFindingsBase=renderFindings;renderFindings=function(){renderFindingsBase();updateRiskBreakdown();};
+function currentDfa(){return state.current?.min||state.current?.dfa;}
+function testString(){if(!state.current){toast('Run an analysis first.');return;}const s=$('testString').value,res=runOnDfa(state.current.dfa,s);if(res.error){$('testResult').innerHTML=`<div class="accept-result failure"><strong>Unsupported input</strong><p>${esc(res.error)}</p></div>`;return;}const accepted=res.accepted;$('testResult').innerHTML=`<div class="accept-result ${accepted?'success':'failure'}"><strong>${accepted?'✓ String accepted':'× String rejected'}</strong><p>${accepted?'The DFA ended in an accepting state.':'The full string did not finish in an accepting state.'} Final state: ${res.final===undefined?'—':'D'+res.final} · ${s.length} input characters.</p></div>`;state.step={input:s,path:res.path,index:0,accepted};renderSteps();}
+function renderSteps(){const st=state.step;if(!st){$('stepChips').innerHTML='';$('stepExplanation').textContent='Run a string test to inspect the path.';return;}const dfa=state.current.dfa;const entries=[{ch:'START',s:st.path[0]}];for(let i=0;i<st.input.length;i++)entries.push({ch:prettyChar(st.input[i]),s:st.path[i+1]===undefined?'×':st.path[i+1]});$('stepChips').innerHTML=entries.map((e,i)=>`<span class="step-chip ${i===st.index?'current':''}">${esc(e.ch)} → ${e.s==='×'?'reject':'D'+e.s}</span>`).join('');if(st.index===0)$('stepExplanation').textContent='Start at DFA state D'+dfa.start+'. Advance one symbol at a time.';else if(st.index<entries.length){const i=st.index-1;$('stepExplanation').textContent=`Read “${prettyChar(st.input[i]||'')}”: transition to ${entries[st.index].s==='×'?'no supported transition':'D'+entries[st.index].s}.`; }else $('stepExplanation').textContent=st.accepted?'All characters consumed; final state accepts.':'All characters consumed; final state rejects.';}
+function nextStep(){if(!state.step)return toast('Test a string first.');const max=state.step.input.length;state.step.index=Math.min(max+1,state.step.index+1);renderSteps();}
+function doEquivalence(){const a=$('repairOriginal').value.trim(),b=$('repairCandidate').value.trim();try{const aa=analyzePattern(a),bb=analyzePattern(b),eq=equivalence(aa.dfa,bb.dfa);state.lastEquivalence={a,b,aa,bb,eq};if(eq.equivalent)state.verified++;$('repairStatus').textContent=eq.equivalent?'EQUIVALENT':'NOT EQUIVALENT';$('repairStatus').className='pill '+(eq.equivalent?'green':'red');$('findVerified').textContent=state.verified;$('repairOutput').innerHTML=`<div class="split"><div class="metric"><div class="metric-label">Original machine</div><div class="metric-value">${aa.dfa.states.length}</div><div class="metric-foot">DFA states · ${aa.pattern.replace(/&/g,'&amp;').replace(/</g,'&lt;')}</div></div><div class="metric"><div class="metric-label">Replacement machine</div><div class="metric-value">${bb.dfa.states.length}</div><div class="metric-foot">DFA states · ${bb.pattern.replace(/&/g,'&amp;').replace(/</g,'&lt;')}</div></div></div><div class="accept-result ${eq.equivalent?'success':'failure'}" style="margin-top:14px"><strong>${eq.equivalent?'✓ Equivalent languages established':'× Languages differ'}</strong><p>${eq.equivalent?'The product-automaton search examined '+eq.checked+' state pairs and found no input string on which acceptance differs, for the implemented grammar and ASCII alphabet.':'Counterexample found: '+(eq.counterexample===''?'ε (empty string)':'“'+esc(eq.counterexample)+'”')+'. This string is accepted by one pattern and rejected by the other.'}</p></div><div class="status-note" style="margin-top:12px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-8h.1"/></svg><span>Method: construct complete DFAs and traverse their product; search for a pair where exactly one state accepts. Equivalent = no counterexample was found within this exact supported model. This checks language equivalence, not performance of an external regex engine.</span></div>`;toast(eq.equivalent?'Equivalence established for supported syntax.':'Counterexample found; replacement changes the language.');}catch(err){$('repairStatus').textContent='UNAVAILABLE';$('repairStatus').className='pill amber';$('repairOutput').innerHTML=`<div class="accept-result failure"><strong>Cannot verify this pattern</strong><p>${esc(err.message)}</p></div>`;toast('Equivalence check could not run.');}}
+function analyzeTaint(code){const lines=code.split(/\r?\n/),tainted=new Set(),vars=new Map(),path=[];const sources=['req.query','req.params','req.body','request.','formData','userInput','user_input'];for(let i=0;i<lines.length;i++){const line=lines[i];const m=line.match(/^\s*(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*(.+?);?\s*$/);if(m){const name=m[1],rhs=m[2];vars.set(name,{rhs,line:i+1,full:line});if(sources.some(s=>rhs.includes(s))||rhs.trim()==='input'){tainted.add(name);path.push({kind:'source',title:'Untrusted input source',code:line.trim(),line:i+1,name});}else if([...tainted].some(v=>new RegExp('\\b'+v.replace(/[$]/g,'\\$')+'\\b').test(rhs))){tainted.add(name);path.push({kind:'propagation',title:'Tainted value propagated',code:line.trim(),line:i+1,name});}}
+ }
+ const regexes=sourceRegexes(code);let sink=null;for(let i=0;i<lines.length;i++){const line=lines[i];const m=line.match(/\b([A-Za-z_$][\w$]*)\s*\.\s*(?:test|match)\s*\(\s*([A-Za-z_$][\w$]*)/);if(m&&tainted.has(m[2])){sink={line:i+1,code:line.trim(),patternVariable:m[1],inputVariable:m[2]};path.push({kind:'sink',title:'Regex match sink',code:line.trim(),line:i+1,name:m[1]});break;}}
+ return {tainted:[...tainted],path,sink,regexes,lines};}
+function renderTaint(){const t=state.taint;if(!t)return;$('taintStatus').textContent=t.sink?'REACHABLE':'NO PATH FOUND';$('taintStatus').className='pill '+(t.sink?'red':'amber');if(!t.path.length){$('taintGraph').innerHTML='<div class="empty-state">No recognized request source was found in the supported sample syntax.</div>';}else $('taintGraph').innerHTML='<div class="taint-nodes">'+t.path.map((p,i)=>`${i?'<div class="taint-arrow"></div>':''}<div class="taint-node"><div class="taint-icon">${p.kind==='source'?'S':p.kind==='sink'?'K':'→'}</div><div><strong>${esc(p.title)} <span class="pill ${p.kind==='sink'?'red':p.kind==='source'?'teal':'blue'}" style="margin-left:6px">Line ${p.line}</span></strong><span>${esc(p.code)}</span></div></div>`).join('')+'</div>';$('taintSummary').className='status-note';$('taintSummary').innerHTML=`${iconSvg(t.sink?'alert':'info')}<span>${t.sink?`A tainted variable (${esc(t.sink.inputVariable)}) reaches the regex sink on line ${t.sink.line}. This is a restricted source-to-sink trace, not proof of ReDoS exploitability.`:'A complete source-to-sink path was not found in the recognized subset. This does not establish that the program is safe.'}</span>`;if(t.regexes.length&&t.sink){const pat=t.regexes.find(r=>r.variable===t.sink.patternVariable);if(pat){try{const ar=analyzePattern(pat.pattern);$('taintSummary').innerHTML+=`<span style="display:block;margin-top:4px">Regex rule assessment: <strong>${esc(ar.risk.title)}</strong> — ${esc(ar.risk.rule)}</span>`;}catch(e){}}}}
+function scanSourceForFindings(code){const extracted=sourceRegexes(code);if(!extracted.length)throw new Error('No regex literals assigned to variables were found. Example supported syntax: const pattern = /(a+)+$/;');const found=extracted.map(r=>({pattern:r.pattern,variable:r.variable,index:r.index}));return found;}
+function exportReport(){const report={product:'SafeScan',version:'Prototype 0.1',generatedAt:new Date().toISOString(),scope:'Browser-local restricted regex grammar; ASCII alphabet; ReDoS assessment is heuristic.',patternsAnalyzed:state.findings.length,findings:state.findings.map(f=>({pattern:f.pattern,assessment:f.assessment,automata:{nfaStates:f.nfa,dfaStates:f.dfa,minimizedDfaStates:f.min},timestamp:f.timestamp,sourceMode:f.sourceMode})),lastEquivalence:state.lastEquivalence?{original:state.lastEquivalence.a,candidate:state.lastEquivalence.b,equivalent:state.lastEquivalence.eq.equivalent,counterexample:state.lastEquivalence.eq.counterexample??null,checkedStatePairs:state.lastEquivalence.eq.checked}:null};const blob=new Blob([JSON.stringify(report,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='safescan-report.json';a.click();URL.revokeObjectURL(url);toast('JSON report exported.');}
+function navigate(view){if(!names[view])return;document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id==='view-'+view));document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===view));$('breadcrumb').textContent=names[view];if(view==='automata')renderGraph(state.graph);if(view==='findings')renderFindings();if(view==='repair'){$('repairOriginal').value=state.current?.pattern||'^(a+)+$';}window.scrollTo({top:0,behavior:'smooth'});}
+document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>navigate(b.dataset.view)));document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>navigate(b.dataset.go)));$('topNewScan').addEventListener('click',()=>{navigate('workbench');$('sourceInput').focus();});$('sourceInput').addEventListener('input',updateLines);$('runAnalysis').addEventListener('click',runAnalysis);document.querySelectorAll('#inputMode button').forEach(b=>b.addEventListener('click',()=>setInputMode(b.dataset.mode)));document.querySelectorAll('[data-sample]').forEach(b=>b.addEventListener('click',()=>chooseSample(b.dataset.sample)));document.querySelectorAll('#graphMode button').forEach(b=>b.addEventListener('click',()=>{state.graph=b.dataset.graph;document.querySelectorAll('#graphMode button').forEach(x=>x.classList.toggle('active',x===b));renderGraph(state.graph);}));$('testStringBtn').addEventListener('click',testString);$('testString').addEventListener('keydown',e=>{if(e.key==='Enter')testString();});$('stepReset').addEventListener('click',()=>{if(state.step){state.step.index=0;renderSteps();}});$('stepNext').addEventListener('click',nextStep);$('verifyRepair').addEventListener('click',doEquivalence);$('runTaint').addEventListener('click',()=>{state.taint=analyzeTaint($('taintCode').value);renderTaint();});$('resetTaint').addEventListener('click',()=>{$('taintCode').value=defaultSource;state.taint=null;$('taintGraph').innerHTML='<div class="empty-state">Run the flow analysis to display a trace.</div>';$('taintStatus').textContent='NOT RUN';$('taintSummary').innerHTML=iconSvg('info')+'<span>Example reset. Click “Trace data flow” to analyze it.</span>';});$('exportReport').addEventListener('click',exportReport);$('findingsExport').addEventListener('click',exportReport);$('findingSearch').addEventListener('input',renderFindings);$('findingFilter').addEventListener('change',renderFindings);$('findingRows').addEventListener('click',e=>{const btn=e.target.closest('[data-finding]');if(!btn)return;const f=state.findings.find(x=>String(x.id)===btn.dataset.finding);if(f){$('sourceInput').value=f.input||f.pattern;state.mode=f.sourceMode?'source':'regex';setInputMode(state.mode);$('sourceInput').value=f.input||f.pattern;updateLines();if(f.sourceMode){const found=sourceRegexes(f.input||'');if(found.length)state.current=analyzePattern(found[0].pattern);}else state.current=analyzePattern(f.pattern);renderCurrent();navigate('workbench');}});$('repairCandidate').addEventListener('keydown',e=>{if(e.key==='Enter')doEquivalence();});
+// Small appearance variants: stored locally; no account or external service needed.
+$('findingTypeFilter').addEventListener('change',renderFindings);
+function applyAccentTheme(name,persist){const colors={teal:'#36d6c5',blue:'#83aaff',violet:'#b7a0ff'};const chosen=colors[name]?name:'teal';document.documentElement.style.setProperty('--site-primary',colors[chosen],'important');if($('accentSelect'))$('accentSelect').value=chosen;if(persist){try{localStorage.setItem('safescan-accent-v1',chosen);}catch(error){}}}
+// Source-code suggestions are conservative and only appear when equivalence is established.
+const renderCurrentBase=renderCurrent;
+renderCurrent=function(){renderCurrentBase();renderSourceRepair();renderHistory();};
+function formatDuration(ms){if(!Number.isFinite(ms))return '—';return ms<1000?ms.toFixed(1)+' ms':(ms/1000).toFixed(2)+' s';}
+function saveHistory(){try{localStorage.setItem('safescan-local-history-v1',JSON.stringify(state.history.slice(0,40)));}catch(error){toast('History could not be saved in browser storage.');}}
+function loadHistory(){try{const saved=JSON.parse(localStorage.getItem('safescan-local-history-v1')||'[]');state.history=Array.isArray(saved)?saved.filter(item=>item&&typeof item.input==='string'&&typeof item.timestamp==='string').slice(0,40):[];}catch(error){state.history=[];}}
+function renderHistory(){const items=state.history;$('navHistory').textContent=items.length;$('historyTotal').textContent=items.length;$('historyRisks').textContent=items.filter(item=>item.severity==='HIGH RISK'||item.severity==='MODERATE RISK'||item.severity==='WARNING').length;const average=items.length?items.reduce((sum,item)=>sum+(Number(item.durationMs)||0),0)/items.length:null;$('historyAverage').textContent=average===null?'—':formatDuration(average);$('historyRepairs').textContent=state.verified;$('historyRows').innerHTML=items.map(item=>{const date=new Date(item.timestamp);const dateText=Number.isNaN(date.getTime())?'Unknown date':date.toLocaleString([],{month:'short',day:'2-digit',hour:'2-digit',minute:'2-digit'});const title=item.mode==='source'?(item.fileName||'Source snippet'):'Direct regex';return '<tr><td><span class=\"history-time\">'+esc(dateText)+'</span></td><td><span class=\"history-input\" title=\"'+esc(item.input)+'\">'+esc(title+' · '+item.pattern)+'</span></td><td><span class=\"pill '+(item.severity==='HIGH RISK'?'red':item.severity==='MODERATE RISK'||item.severity==='WARNING'?'amber':'green')+'\">'+esc(item.severity)+'</span><div class=\"small muted\" style=\"margin-top:3px\">'+esc(item.rule)+'</div></td><td>'+esc(formatDuration(Number(item.durationMs)||0))+'</td><td><span class=\"mono\">'+item.nfa+' / '+item.dfa+' / '+item.min+'</span></td><td><button class=\"btn btn-small\" data-history-restore=\"'+esc(item.id)+'\">Restore</button></td></tr>';}).join('')||'<tr><td colspan=\"6\"><div class=\"empty-state\">No saved analyses yet. Run a regex or scan a source snippet to create your first history entry.</div></td></tr>';}
+function suggestSafeRegex(pattern){const nested=pattern.replace(/\((\[[^\]]+\]|\\.|[A-Za-z0-9])([+*])\)\+/,'$1$2');if(nested!==pattern)return nested;const overlap=pattern.replace(/\((\w)\|\1\1\)\+/,'$1+');if(overlap!==pattern)return overlap;return null;}
+function renderSourceRepair(){const panel=$('sourceRepairPanel');if(state.mode!=='source'&&!state.current?.sourceMode){panel.classList.add('hidden');return;}panel.classList.remove('hidden');const code=state.mode==='source'?$ ('sourceInput').value:(state.currentSource||state.current?.input||'');$('sourceOriginalPreview').value=code;$('sourceCorrectedPreview').value=code;state.correctedSource=code;state.sourceRepairReady=false;$('copyCorrectedCode').disabled=true;$('downloadCorrectedCode').disabled=true;$('sourceRepairStatus').textContent='NO VERIFIED EDIT';$('sourceRepairStatus').className='pill amber';$('correctedCodeBadge').textContent='UNCHANGED';$('sourceRepairNote').textContent='The original is preserved by default. An automatic edit is offered only for a recognized pattern whose accepted language can be verified by this prototype.';const found=sourceRegexes(code);if(!found.length){$('sourceRepairNote').textContent='No supported regex literal assigned to a variable was found. Try: const pattern = /(a+)+$/;';return;}const item=found[0];$('sourceFileName').textContent=state.sourceFileName||'Pasted source';if(item.flags){$('sourceRepairNote').textContent='The first regex has flags ('+item.flags+'). Automatic rewriting is disabled for flagged patterns in this prototype; no source code was changed.';return;}let candidate=suggestSafeRegex(item.pattern);if(!candidate){$('sourceRepairNote').textContent='No automatic rewrite rule applies to the first extracted regex. The complete original source is shown on the right unchanged; use Repair Verification to compare a candidate manually.';return;}try{const original=analyzePattern(item.pattern),replacement=analyzePattern(candidate);if(original.risk.level!=='risk'){ $('sourceRepairNote').textContent='The selected pattern did not trigger a supported risk heuristic. No automatic rewrite was proposed.';return;}const comparison=equivalence(original.dfa,replacement.dfa);if(!comparison.equivalent){$('sourceRepairNote').textContent='The candidate did not pass the language-equivalence check. The original file is unchanged; no fix is offered.';return;}const corrected=code.slice(0,item.patternStart)+candidate+code.slice(item.patternEnd);$('sourceCorrectedPreview').value=corrected;state.correctedSource=corrected;state.sourceRepairReady=true;$('copyCorrectedCode').disabled=false;$('downloadCorrectedCode').disabled=false;$('sourceRepairStatus').textContent='EQUIVALENCE VERIFIED';$('sourceRepairStatus').className='pill green';$('correctedCodeBadge').textContent='VERIFIED EDIT';$('sourceRepairNote').textContent='A conservative replacement ('+item.pattern+' → '+candidate+') passed product-DFA language equivalence for the implemented ASCII regex grammar. Only the first extracted regex was considered; review the complete file before replacing your original.';}catch(error){$('sourceRepairNote').textContent='Automatic repair is unavailable: '+error.message+'. The original source has been retained unchanged.';}}
+function restoreHistory(id){const item=state.history.find(entry=>String(entry.id)===String(id));if(!item)return;state.mode=item.mode==='source'?'source':'regex';state.sourceFileName=item.fileName||'safescan-corrected.js';setInputMode(state.mode);$('sourceInput').value=item.input;updateLines();try{const pattern=state.mode==='source'?(sourceRegexes(item.input)[0]?.pattern):item.pattern;if(!pattern)throw new Error('No supported regex could be restored from this run.');const result=analyzePattern(pattern);result.sourceMode=state.mode==='source';result.sourceSummary=state.mode==='source'?sourceRegexes(item.input):null;result.input=item.input;result.durationMs=item.durationMs;state.current=result;state.currentSource=state.mode==='source'?item.input:'';renderCurrent();navigate('workbench');toast('Previous run restored.');}catch(error){toast('Could not restore this run: '+error.message);}}
+function copyCorrectedCode(){if(!state.sourceRepairReady)return;const box=$('sourceCorrectedPreview');box.focus();box.select();try{const ok=document.execCommand('copy');if(ok){toast('Verified corrected source copied.');return;}}catch(error){}if(navigator.clipboard?.writeText)navigator.clipboard.writeText(state.correctedSource).then(()=>toast('Verified corrected source copied.')).catch(()=>toast('Copy was blocked; select the text in the corrected-code box.'));else toast('Select the text in the corrected-code box and copy it.');}
+function downloadCorrectedCode(){if(!state.sourceRepairReady)return;const blob=new Blob([state.correctedSource],{type:'text/javascript;charset=utf-8'});const url=URL.createObjectURL(blob);const anchor=document.createElement('a');anchor.href=url;const name=state.sourceFileName||'safescan-corrected.js';anchor.download=name.replace(/(\.[^.]+)?$/,'-safescan-fixed$1');anchor.click();setTimeout(()=>URL.revokeObjectURL(url),500);toast('Downloaded a separate fixed-code copy; the original file was not overwritten.');}
+// Repository-aware scanning and automatic repair overrides.
+state.batchFiles = [];
+state.sourceResults = [];
+state.selectedRepairFile = '';
+state.selectedEdge = null;
+state.theme = 'light';
+names.repair = 'Repair Execution';
+
+function buildSourceResult(file) {
+  const code = file.content || '';
+  const path = file.path || file.name || 'pasted-source.js';
+  const matches = sourceRegexes(code);
+  const patterns = [];
+  const edits = [];
+  for (const match of matches) {
+    const line = code.slice(0, match.patternStart).split(/\r?\n/).length;
+    const record = {pattern:match.pattern, variable:match.variable, flags:match.flags, line, start:match.patternStart, end:match.patternEnd, result:null, assessment:null, replacement:null, repairStatus:'No supported automatic edit', equivalence:null};
+    try {
+      const patternStarted = performance.now();
+      const result = analyzePattern(match.pattern);
+      result.durationMs = Math.max(0, performance.now()-patternStarted);
+      record.result = result;
+      record.assessment = result.risk;
+      if (result.risk.level === 'risk' && !match.flags) {
+        const candidate = suggestSafeRegex(match.pattern);
+        if (candidate && candidate !== match.pattern) {
+          try {
+            const candidateResult = analyzePattern(candidate);
+            const comparison = equivalence(result.dfa, candidateResult.dfa);
+            record.equivalence = comparison.equivalent;
+            if (comparison.equivalent) {
+              record.replacement = candidate;
+              record.repairStatus = 'Verified replacement ready';
+              edits.push({start:match.patternStart, end:match.patternEnd, original:match.pattern, replacement:candidate, line, rule:result.risk.rule, variable:match.variable, equivalence:true});
+            } else {
+              record.repairStatus = 'Candidate rejected: languages differ';
+            }
+          } catch (error) {
+            record.repairStatus = 'Could not verify candidate';
+          }
+        } else if (match.flags) {
+          record.repairStatus = 'Flags present; automatic edit skipped';
+        }
+      } else if (result.risk.level !== 'risk') {
+        record.repairStatus = 'No supported risk rule matched';
+      }
+    } catch (error) {
+      record.assessment = {level:'error', severity:'UNSUPPORTED', title:'Regex syntax unsupported', subtitle:'Outside the prototype grammar', rule:'UNSUPPORTED_SYNTAX', explanation:error.message, evidence:'No automaton or automatic repair was generated for this pattern.'};
+      record.repairStatus = 'Unsupported syntax; unchanged';
+    }
+    patterns.push(record);
+  }
+  let corrected = code;
+  edits.slice().sort((a,b)=>b.start-a.start).forEach(edit => {
+    corrected = corrected.slice(0, edit.start) + edit.replacement + corrected.slice(edit.end);
+  });
+  return {path, name:file.name||path, original:code, corrected, patterns, edits, regexCount:patterns.length, unsupportedCount:patterns.filter(p=>p.assessment&&p.assessment.level==='error').length};
+}
+
+function createFindingFromPattern(file, item) {
+  const r = item.result;
+  return {id:Date.now()+Math.random(), pattern:item.pattern, assessment:item.assessment, nfa:r?r.nfa.states.length:0, dfa:r?r.dfa.states.length:0, min:r?r.min.states.length:0, timestamp:r?r.timestamp:new Date().toISOString(), sourceMode:true, input:file.original, fileName:file.path, filePath:file.path, line:item.line, sourceCode:file.original, replacement:item.replacement, repairStatus:item.repairStatus, equivalence:item.equivalence};
+}
+
+function runAnalysis() {
+  const started = performance.now();
+  const raw = $('sourceInput').value;
+  if (!raw.trim()) { toast('Enter a regex or source snippet first.'); return; }
+  if (state.mode === 'source') {
+    const inputFiles = state.batchFiles.length ? state.batchFiles.slice() : [{name:state.sourceFileName||'pasted-source.js',path:state.sourceFileName||'pasted-source.js',content:raw}];
+    const results = [];
+    const freshFindings = [];
+    for (const file of inputFiles) {
+      const fileResult = buildSourceResult(file);
+      results.push(fileResult);
+      for (const item of fileResult.patterns) freshFindings.push(createFindingFromPattern(fileResult,item));
+    }
+    state.sourceResults = results;
+    if (!results.some(file=>file.regexCount)) {
+      renderSourceRepair();
+      renderRepairExecution();
+      toast('Scanned '+results.length+' file(s), but found no supported regex literals assigned to variables.');
+      return;
+    }
+    state.findings = freshFindings.concat(state.findings).slice(0,500);
+    const allPatterns = results.flatMap(file=>file.patterns.map(item=>({file,item})));
+    const chosen = allPatterns.find(pair=>pair.item.result&&pair.item.assessment.level==='risk') || allPatterns.find(pair=>pair.item.result);
+    if (chosen) {
+      state.current = chosen.item.result;
+      state.current.sourceMode = true;
+      state.current.input = chosen.file.original;
+      state.current.sourceSummary = chosen.file.patterns;
+      state.current.fileName = chosen.file.path;
+      state.current.line = chosen.item.line;
+      state.current.durationMs = performance.now()-started;
+      state.currentSource = chosen.file.original;
+      state.sourceFileName = chosen.file.path;
+      state.selectedRepairFile = chosen.file.path;
+    }
+    for (const pair of allPatterns) {
+      if (!pair.item.result) continue;
+      state.history.unshift({id:Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7),timestamp:pair.item.result.timestamp,durationMs:pair.item.result.durationMs||0,mode:'regex',input:pair.item.pattern,pattern:pair.item.pattern,severity:pair.item.assessment.severity,rule:pair.item.assessment.rule,nfa:pair.item.result.nfa.states.length,dfa:pair.item.result.dfa.states.length,min:pair.item.result.min.states.length,fileName:pair.file.path+' · line '+pair.item.line});
+    }
+    state.history = state.history.slice(0,40);
+    saveHistory();
+    renderHistory();
+    renderCurrent();
+    renderSourceRepair();
+    renderRepairExecution();
+    const editCount = results.reduce((sum,file)=>sum+file.edits.length,0);
+    const patternCount = results.reduce((sum,file)=>sum+file.regexCount,0);
+    $('lastRunLabel').textContent = results.length+' file(s) · '+patternCount+' regex pattern(s) analyzed';
+    toast('Scan complete · '+results.length+' files · '+patternCount+' patterns · '+editCount+' verified edit(s) ready.');
+    return;
+  }
+  state.batchFiles = [];
+  state.sourceResults = [];
+  state.selectedRepairFile = '';
+  try {
+    const result = analyzePattern(raw.trim());
+    result.sourceMode = false;
+    result.sourceSummary = null;
+    result.input = raw.trim();
+    result.durationMs = Math.max(0, performance.now()-started);
+    state.current = result;
+    state.runs++;
+    state.findings.unshift({id:Date.now()+Math.random(),pattern:result.pattern,assessment:result.risk,nfa:result.nfa.states.length,dfa:result.dfa.states.length,min:result.min.states.length,timestamp:result.timestamp,sourceMode:false,input:raw.trim()});
+    if (!state.suppressHistory) {
+      state.history.unshift({id:Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7),timestamp:result.timestamp,durationMs:result.durationMs,mode:'regex',input:raw.trim(),pattern:result.pattern,severity:result.risk.severity,rule:result.risk.rule,nfa:result.nfa.states.length,dfa:result.dfa.states.length,min:result.min.states.length,fileName:''});
+      state.history = state.history.slice(0,40);
+      saveHistory();
+      renderHistory();
+    }
+    renderCurrent();
+    toast('Analysis complete · '+formatDuration(result.durationMs)+' · '+result.nfa.states.length+' NFA / '+result.dfa.states.length+' DFA states.');
+  } catch (error) {
+    $('resultStatus').textContent='ERROR';
+    $('verdictTitle').textContent='Analysis unavailable';
+    $('verdictSub').textContent='The input is outside the supported grammar';
+    $('riskCopy').textContent=error.message;
+    $('severityPill').textContent='UNSUPPORTED';
+    $('severityPill').className='pill amber';
+    $('verdictIcon').className='verdict-icon warn';
+    $('verdictIcon').innerHTML=iconSvg('info');
+    $('evidenceCode').innerHTML='<div class="empty-state">No automaton was produced for this input.</div>';
+    $('evidenceNote').textContent='Unsupported syntax is reported explicitly; it is not silently ignored.';
+    toast(error.message);
+  }
+}
+
+function currentSourceResult() {
+  if (!state.sourceResults.length) return null;
+  let selected = state.sourceResults.find(file=>file.path===state.selectedRepairFile);
+  if (!selected) selected = state.sourceResults.find(file=>file.edits.length) || state.sourceResults[0];
+  state.selectedRepairFile = selected.path;
+  return selected;
+}
+
+function setRepairSelectOptions(selectId, selectedPath) {
+  const select = $(selectId);
+  if (!select) return;
+  select.innerHTML = state.sourceResults.map(file=>'<option value="'+esc(file.path)+'">'+esc(file.path)+'</option>').join('') || '<option value="">No source files analyzed</option>';
+  select.value = state.sourceResults.some(file=>file.path===selectedPath) ? selectedPath : (state.sourceResults[0]?.path||'');
+}
+
+function renderSourceRepair() {
+  const panel = $('sourceRepairPanel');
+  if (state.mode!=='source' && !state.current?.sourceMode) { panel.classList.add('hidden'); return; }
+  panel.classList.remove('hidden');
+  setRepairSelectOptions('repairFileSelect',state.selectedRepairFile);
+  const file = currentSourceResult();
+  if (!file) {
+    const code = $('sourceInput').value;
+    $('sourceOriginalPreview').value = code;
+    $('sourceCorrectedPreview').value = code;
+    state.correctedSource = code;
+    state.sourceRepairReady = false;
+    $('copyCorrectedCode').disabled = true;
+    $('downloadCorrectedCode').disabled = true;
+    $('sourceRepairStatus').textContent='NOT ANALYZED';
+    $('sourceRepairStatus').className='pill amber';
+    $('correctedCodeBadge').textContent='UNCHANGED';
+    $('sourceRepairSummary').textContent='Paste or upload source code, then run analysis to identify supported regexes.';
+    $('sourceRepairNote').textContent='The original is preserved. A proposed edit appears only if a recognized risky regex has a candidate that passes language-equivalence checking.';
+    $('sourceFileName').textContent=state.batchFiles.length+' source files selected';
+    return;
+  }
+  $('sourceOriginalPreview').value = file.original;
+  $('sourceCorrectedPreview').value = file.corrected;
+  state.correctedSource = file.corrected;
+  state.sourceRepairReady = file.edits.length>0;
+  $('copyCorrectedCode').disabled = !state.sourceRepairReady;
+  $('downloadCorrectedCode').disabled = !file;
+  $('sourceRepairStatus').textContent=file.edits.length?'VERIFIED EDITS READY':'NO SAFE EDIT AVAILABLE';
+  $('sourceRepairStatus').className='pill '+(file.edits.length?'green':'amber');
+  $('correctedCodeBadge').textContent=file.edits.length?'VERIFIED EDIT':'UNCHANGED';
+  $('sourceRepairSummary').textContent=file.regexCount+' regex pattern(s) in '+file.path+' · '+file.edits.length+' verified edit(s) · '+file.unsupportedCount+' unsupported pattern(s).';
+  $('sourceRepairNote').textContent=file.edits.length?'Supported candidate(s) passed the internal DFA language-equivalence check. The corrected preview changes only regex literals with verified replacements; all other source text is preserved.':'No automatically verified edit is available for this file. Any unsupported or unfixable code is preserved unchanged.';
+  $('sourceFileName').textContent=state.batchFiles.length?state.batchFiles.length+' source file(s) loaded':file.path;
+}
+
+function renderRepairExecution() {
+  setRepairSelectOptions('repairTargetSelect',state.selectedRepairFile);
+  const files = state.sourceResults;
+  const allPatterns = files.flatMap(file=>file.patterns.map(item=>({file,item})));
+  const totalEdits = files.reduce((sum,file)=>sum+file.edits.length,0);
+  const unmodifiedRisks = allPatterns.filter(pair=>pair.item.assessment&&pair.item.assessment.level==='risk'&&!pair.item.replacement).length;
+  $('repairFilesCount').textContent=files.length;
+  $('repairPatternsCount').textContent=allPatterns.length;
+  $('repairEditsCount').textContent=totalEdits;
+  $('repairUnfixedCount').textContent=unmodifiedRisks;
+  const file=currentSourceResult();
+  if (file) {
+    $('repairTargetSelect').value=file.path;
+    $('repairExecutionOriginal').value=file.original;
+    $('repairExecutionCorrected').value=file.corrected;
+    $('repairExecutionBadge').textContent=file.edits.length?'VERIFIED EDIT':'UNCHANGED';
+    $('repairExecutionNote').innerHTML=iconSvg(file.edits.length?'check':'info')+'<span>'+esc(file.path)+': '+file.regexCount+' regex pattern(s), '+file.edits.length+' verified edit(s), '+file.unsupportedCount+' unsupported pattern(s). Original file is not overwritten.</span>';
+    $('downloadSelectedRepair').disabled=false;
+    $('downloadRepairBundle').disabled=!files.length;
+  } else {
+    $('repairExecutionOriginal').value='';
+    $('repairExecutionCorrected').value='';
+    $('repairExecutionBadge').textContent='PREVIEW';
+    $('repairExecutionNote').innerHTML=iconSvg('info')+'<span>Run a source-code scan first. Verified changes will be applied only to a generated copy.</span>';
+    $('downloadSelectedRepair').disabled=true;
+    $('downloadRepairBundle').disabled=true;
+  }
+  $('repairResultsRows').innerHTML=allPatterns.map(pair=>{
+    const item=pair.item;
+    const risk=item.assessment||{severity:'UNSUPPORTED',level:'error',rule:'UNKNOWN'};
+    const status=item.replacement?'Verified edit ready':item.assessment&&item.assessment.level==='error'?'Unsupported · unchanged':risk.level==='risk'?'Review needed · unchanged':'No edit needed';
+    const check=item.equivalence===true?'Equivalent':item.equivalence===false?'Rejected':'Not applicable';
+    return '<tr><td><span class="history-input" title="'+esc(pair.file.path)+'">'+esc(pair.file.path)+'</span><div class="small muted">Line '+item.line+'</div></td><td><code>'+esc(item.pattern)+'</code></td><td><span class="pill '+(risk.severity==='HIGH RISK'?'red':risk.severity==='MODERATE RISK'||risk.severity==='WARNING'?'amber':risk.level==='error'?'amber':'green')+'">'+esc(risk.rule||risk.severity)+'</span><div class="small muted" style="margin-top:3px">'+esc(risk.title||risk.severity)+'</div></td><td>'+esc(status)+(item.replacement?'<div class="mono small" style="margin-top:4px">'+esc(item.pattern)+' → '+esc(item.replacement)+'</div>':'')+'</td><td><span class="pill '+(item.equivalence===true?'green':item.equivalence===false?'red':'')+'">'+esc(check)+'</span></td></tr>';
+  }).join('') || '<tr><td colspan="5"><div class="empty-state">Upload or paste source code and run analysis to see repair actions.</div></td></tr>';
+}
+
+function renderFindings() {
+  const query=($('findingSearch')?.value||'').toLowerCase();
+  const filter=$('findingFilter')?.value||'all';
+  const typeFilter=$('findingTypeFilter')?.value||'all';
+  const typeNotes={all:'Nested quantifiers can multiply backtracking paths; overlapping alternatives can trigger repeated path reconsideration on failing input. These are heuristic warnings, not proof of exploitability.',nested:'Nested quantifiers repeat an expression that already repeats; a backtracking engine may explore many partitions of a failing string.',overlap:'Overlapping alternatives share possible starting characters; a backtracking engine may repeatedly retry ambiguous branches.',clear:'No supported warning rule matched. This does not prove the regex is safe in every engine.',unsupported:'This pattern is outside SafeScan’s supported grammar, so its behavior and ReDoS risk were not assessed.'};
+  $('findingTypeInfo').textContent=typeNotes[typeFilter]||typeNotes.all;
+  const list=state.findings.filter(f=>(f.pattern.toLowerCase().includes(query)||(f.assessment?.rule||'').toLowerCase().includes(query)||(f.fileName||'').toLowerCase().includes(query))&&(filter==='all'||(filter==='risk'&&f.assessment?.level==='risk')||(filter==='clear'&&f.assessment?.level==='clear')||(filter==='error'&&f.assessment?.level==='error'))&&(typeFilter==='all'||(typeFilter==='nested'&&f.assessment?.rule==='NESTED_QUANTIFIER')||(typeFilter==='overlap'&&f.assessment?.rule==='OVERLAPPING_ALTERNATION')||(typeFilter==='clear'&&f.assessment?.level==='clear')||(typeFilter==='unsupported'&&f.assessment?.level==='error')));
+  $('findingRows').innerHTML=list.map(f=>{
+    const risk=f.assessment||{level:'error',severity:'UNSUPPORTED',rule:'UNKNOWN',subtitle:'Unsupported pattern'};
+    const label=risk.level==='risk'?(risk.severity==='HIGH RISK'?'red':'amber'):risk.level==='error'?'amber':'green';
+    return '<tr><td><code>'+esc(f.pattern)+'</code></td><td><span class="history-input" title="'+esc(f.fileName||'Direct regex input')+'">'+esc(f.fileName||'Direct regex input')+'</span><div class="small muted">Line '+(f.line||'—')+'</div></td><td><span class="pill '+label+'">'+esc(risk.severity)+'</span></td><td><div>'+esc(risk.rule||'UNKNOWN')+'</div><div class="small muted" style="margin-top:3px">'+esc(risk.subtitle||'')+'</div></td><td><span class="mono">'+(f.nfa||0)+' / '+(f.dfa||0)+' / '+(f.min||0)+'</span><div class="small muted">NFA / DFA / Min</div></td><td><button class="btn btn-small" data-finding="'+String(f.id)+'">Inspect ↗</button></td></tr>';
+  }).join('') || '<tr><td colspan="6"><div class="empty-state">No findings match this filter.</div></td></tr>';
+  if ($('countHigh')) $('countHigh').textContent=list.filter(f=>f.assessment?.severity==='HIGH RISK').length;
+  if ($('countModerate')) $('countModerate').textContent=list.filter(f=>f.assessment?.severity==='MODERATE RISK'||f.assessment?.severity==='WARNING').length;
+  if ($('countLow')) $('countLow').textContent=list.filter(f=>f.assessment?.level==='clear').length;
+}
+
+function bindGraphInteractions(type) {
+  const svg=$('graphWrap').querySelector('svg');
+  if (!svg) return;
+  svg.querySelectorAll('.automata-node').forEach(node=>{
+    node.addEventListener('click',()=>{state.selectedEdge=null;selectAutomataState(node.dataset.state,type);});
+    node.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();state.selectedEdge=null;selectAutomataState(node.dataset.state,type);}});
+  });
+  svg.querySelectorAll('.automata-edge').forEach(edge=>{
+    edge.addEventListener('click',event=>{
+      event.stopPropagation();
+      const chosen={from:Number(edge.dataset.from),to:Number(edge.dataset.to),label:edge.dataset.label,type};
+      state.selectedEdge=chosen;
+      const input=$('walkInput').value;
+      let frames;
+      try { frames=makeWalkFrames(type,input); } catch(error) { frames=[{active:[],symbol:'EDGE',note:error.message}]; }
+      let index=0;
+      for(let i=1;i<frames.length;i++){
+        if(frames[i].from&&frames[i].from.includes(chosen.from)&&frames[i].active.includes(chosen.to)){index=i;break;}
+      }
+      if(index===0)frames.push({active:[chosen.to],from:[chosen.from],symbol:chosen.label,note:'Manually selected graph transition from '+chosen.from+' to '+chosen.to+' on '+chosen.label+'.'});
+      if(index===0)index=frames.length-1;
+      state.animation={type,input,frames,index,focusedEdge:chosen};
+      renderWalkFrame();
+    });
+  });
+}
+
+function renderWalkFrame() {
+  const walk=state.animation;
+  if (!walk) return;
+  const frame=walk.frames[walk.index]||walk.frames[0];
+  const meta=automataMeta(walk.type);
+  const svg=$('graphWrap').querySelector('svg');
+  if (svg) {
+    svg.querySelectorAll('.automata-node').forEach(node=>node.classList.toggle('walk-active',frame.active.includes(Number(node.dataset.state))));
+    svg.querySelectorAll('.automata-edge').forEach(edge=>{
+      const exact=walk.focusedEdge&&Number(edge.dataset.from)===walk.focusedEdge.from&&Number(edge.dataset.to)===walk.focusedEdge.to&&edge.dataset.label===walk.focusedEdge.label;
+      edge.classList.toggle('walk-active',walk.focusedEdge?!!exact:(walk.index>0&&frame.from&&frame.from.includes(Number(edge.dataset.from))&&frame.active.includes(Number(edge.dataset.to))));
+      edge.classList.toggle('edge-selected',!!exact);
+    });
+  }
+  if (walk.focusedEdge) {
+    const e=walk.focusedEdge;
+    $('walkStatus').innerHTML='<strong>Selected transition:</strong> '+esc(meta.prefix+e.from)+' — <strong>'+esc(e.label)+'</strong> → '+esc(meta.prefix+e.to)+'. Only this edge is highlighted. Click “Start / next” to step this transition.';
+    $('selectedStateTitle').textContent='Focused transition';
+    $('selectedStateInfo').textContent=meta.prefix+e.from+' transitions to '+meta.prefix+e.to+' on '+e.label+'.';
+  } else {
+    const namesForState=frame.active.length?frame.active.map(n=>meta.prefix+n).join(', '):'∅ (no active states)';
+    $('walkStatus').innerHTML='<strong>Step '+walk.index+' of '+(walk.frames.length-1)+' · '+esc(frame.symbol)+':</strong> '+esc(frame.note)+(frame.final!==undefined?' <strong>'+ (frame.final?'ACCEPTED':'REJECTED')+'.</strong> '+esc(frame.finalNote):'');
+    $('selectedStateTitle').textContent=frame.active.length===1?meta.prefix+frame.active[0]+' · Active state':'Active state set · '+frame.active.length+' states';
+    $('selectedStateInfo').textContent='Currently active: '+namesForState+'. '+(frame.final!==undefined?frame.finalNote:'Press Trace next transition to advance one symbol.');
+  }
+  $('walkStepTrack').innerHTML=walk.frames.map((f,i)=>'<button class="walk-frame '+(i===walk.index?'active':'')+'" data-walk-index="'+i+'" type="button">'+(i===0?'START':esc(f.symbol)+' → '+(f.active.length?f.active.map(n=>meta.prefix+n).join(','):'∅'))+'</button>').join('');
+  $('walkStepTrack').querySelectorAll('[data-walk-index]').forEach(button=>button.addEventListener('click',()=>{walk.focusedEdge=null;state.selectedEdge=null;walk.index=Number(button.dataset.walkIndex);renderWalkFrame();}));
+}
+
+function startWalk() {
+  if (!state.current) { toast('Run an analysis before tracing transitions.'); return; }
+  const input=$('walkInput').value;
+  if (state.animation && state.animation.type===state.graph && state.animation.input===input) {
+    if (state.animation.focusedEdge) { state.animation.focusedEdge=null;state.selectedEdge=null;renderWalkFrame();return; }
+    if (state.animation.index < state.animation.frames.length-1) state.animation.index++;
+    else toast('Input sequence finished. Change the input or select another edge.');
+    state.selectedEdge=null;
+    renderWalkFrame();
+    return;
+  }
+  try {
+    state.animation={type:state.graph,input,frames:makeWalkFrames(state.graph,input),index:0,focusedEdge:null};
+    state.selectedEdge=null;
+    renderWalkFrame();
+    $('walkStatus').innerHTML='<strong>Initial state loaded.</strong> Press “Start / next” again to process the first input symbol. Click any graph edge to focus that specific transition.';
+  } catch(error) { $('walkStatus').textContent=error.message; toast(error.message); }
+}
+
+function setInputMode(mode) {
+  const wasSourceMode=state.mode==='source';
+  if (mode==='regex') { state.batchFiles=[];state.sourceResults=[];state.selectedRepairFile=''; }
+  state.mode=mode;
+  document.querySelectorAll('#inputMode button').forEach(button=>button.classList.toggle('active',button.dataset.mode===mode));
+  const input=$('sourceInput');
+  if (mode==='regex') {
+    if (wasSourceMode||!input.value.trim()||input.value===defaultSource) input.value='^(a+)+$';
+    $('editorPrompt').textContent='Regex pattern';$('fileHint').textContent='pattern.regex';$('languagePill').textContent='REGEX';
+    $('inputHint').textContent='Supported: literals, groups, |, *, +, ?, character classes';$('sampleChips').classList.remove('hidden');
+    $('sourceFileTools').classList.add('hidden');$('sourceRepairPanel').classList.add('hidden');$('sourceBatchSummary').classList.add('hidden');
+  } else {
+    if (!input.value.includes('req.query')&&!input.value.includes('pattern.test')&&!sourceRegexes(input.value).length) input.value=defaultSource;
+    $('editorPrompt').textContent='JavaScript / TypeScript source';$('fileHint').textContent=state.sourceFileName||'pasted-source.js';$('languagePill').textContent='SOURCE CODE';
+    $('inputHint').textContent='Scans supported regex literals assigned to variables across the loaded source files.';
+    $('sampleChips').classList.add('hidden');$('sourceFileTools').classList.remove('hidden');$('sourceRepairPanel').classList.remove('hidden');
+    $('sourceBatchSummary').classList.toggle('hidden',!state.batchFiles.length);
+  }
+  updateLines();
+  if (mode==='source') renderSourceRepair();
+}
+
+async function unpackZipSource(file) {
+  const buffer=await file.arrayBuffer(),bytes=new Uint8Array(buffer),view=new DataView(buffer),decoder=new TextDecoder();
+  let end=-1;
+  for(let i=Math.max(0,bytes.length-65557);i<=bytes.length-22;i++)if(view.getUint32(i,true)===0x06054b50)end=i;
+  if(end<0)throw new Error('This ZIP archive has no supported end-of-directory record.');
+  const entryCount=view.getUint16(end+10,true),directoryOffset=view.getUint32(end+16,true);
+  if(entryCount>5000)throw new Error('This archive has too many entries for the browser prototype.');
+  const loaded=[];let cursor=directoryOffset,totalBytes=0;
+  for(let i=0;i<entryCount;i++){
+    if(cursor+46>bytes.length||view.getUint32(cursor,true)!==0x02014b50)throw new Error('The ZIP central directory is malformed.');
+    const flags=view.getUint16(cursor+8,true),method=view.getUint16(cursor+10,true),crc=view.getUint32(cursor+16,true);
+    const compressedSize=view.getUint32(cursor+20,true),uncompressedSize=view.getUint32(cursor+24,true);
+    const nameLength=view.getUint16(cursor+28,true),extraLength=view.getUint16(cursor+30,true),commentLength=view.getUint16(cursor+32,true),localOffset=view.getUint32(cursor+42,true);
+    const originalPath=decoder.decode(bytes.slice(cursor+46,cursor+46+nameLength)).replace(/\\/g,'/');
+    cursor+=46+nameLength+extraLength+commentLength;
+    const safePath=originalPath.split('/').filter(part=>part&&part!=='.'&&part!=='..').join('/');
+    if(!safePath||originalPath.endsWith('/')||!/\.(js|mjs|cjs|jsx|ts|tsx)$/i.test(safePath))continue;
+    if(/(^|\/)(node_modules|\.git|dist|build|coverage)(\/|$)/i.test(safePath))continue;
+    if(flags&1)throw new Error('Encrypted ZIP entries are not supported.');
+    if(method!==0&&method!==8)throw new Error('ZIP compression method '+method+' is not supported for '+safePath+'. Extract the archive locally and upload the folder.');
+    if(uncompressedSize>15*1024*1024||totalBytes+uncompressedSize>15*1024*1024)throw new Error('ZIP source content exceeds the 15 MB scan limit.');
+    if(loaded.length>=100)throw new Error('ZIP contains more than 100 supported source files.');
+    if(localOffset+30>bytes.length||view.getUint32(localOffset,true)!==0x04034b50)throw new Error('A ZIP local file header is malformed.');
+    const localNameLength=view.getUint16(localOffset+26,true),localExtraLength=view.getUint16(localOffset+28,true);
+    const dataOffset=localOffset+30+localNameLength+localExtraLength;
+    const compressed=bytes.slice(dataOffset,dataOffset+compressedSize);
+    let contentBytes;
+    if(method===0)contentBytes=compressed;
+    else {
+      if(typeof DecompressionStream==='undefined')throw new Error('This browser cannot unpack compressed ZIP entries. Extract the archive and upload the folder instead.');
+      try {
+        const stream=new Blob([compressed]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+        contentBytes=new Uint8Array(await new Response(stream).arrayBuffer());
+      } catch(error) { throw new Error('Could not unpack '+safePath+'. Extract the archive and upload the folder instead.'); }
+    }
+    if(contentBytes.length!==uncompressedSize||crc32(contentBytes)!==crc)throw new Error('ZIP integrity check failed for '+safePath+'.');
+    totalBytes+=contentBytes.length;
+    loaded.push({name:safePath.split('/').pop(),path:safePath,content:decoder.decode(contentBytes)});
+  }
+  if(!loaded.length)throw new Error('No supported JavaScript/TypeScript files were found in this ZIP.');
+  return loaded;
+}
+
+async function addSourceFiles(fileList) {
+  const selected=Array.from(fileList||[]).filter(file=>/\.(zip|js|mjs|cjs|jsx|ts|tsx)$/i.test(file.name));
+  if(!selected.length){toast('Choose JavaScript/TypeScript files, a repository folder, or a GitHub ZIP archive.');return;}
+  if(selected.some(file=>file.size>15*1024*1024)||selected.reduce((sum,file)=>sum+file.size,0)>15*1024*1024){toast('Prototype limit: 15 MB of uploaded source/archive data per batch.');return;}
+  try {
+    const loaded=[];
+    for(const file of selected){
+      if(/\.zip$/i.test(file.name))loaded.push(...await unpackZipSource(file));
+      else loaded.push({name:file.name,path:file.webkitRelativePath||file.name,content:await file.text()});
+      if(loaded.length+state.batchFiles.length>100)throw new Error('Prototype limit: 100 source files per scan.');
+    }
+    const existingBytes=state.batchFiles.reduce((sum,item)=>sum+new TextEncoder().encode(item.content).length,0);
+    const incomingBytes=loaded.reduce((sum,item)=>sum+new TextEncoder().encode(item.content).length,0);
+    if(existingBytes+incomingBytes>15*1024*1024)throw new Error('Prototype limit: 15 MB of uncompressed source text per scan.');
+    const merged=new Map(state.batchFiles.map(item=>[item.path,item]));
+    loaded.forEach(item=>merged.set(item.path,item));
+    state.batchFiles=Array.from(merged.values()).slice(0,100);
+    if(!state.batchFiles.length)throw new Error('No readable source files were found.');
+    state.sourceResults=[];state.sourceFileName=state.batchFiles[0].path;
+    setInputMode('source');
+    $('sourceInput').value=state.batchFiles[0].content;
+    $('fileHint').textContent=state.batchFiles[0].path;
+    $('sourceFileName').textContent=state.batchFiles.length+' source file(s) selected';
+    $('sourceBatchSummary').textContent=state.batchFiles.length+' file(s) loaded locally. Scans cover supported regex literals assigned to variables.';
+    $('sourceBatchSummary').classList.remove('hidden');
+    updateLines();runAnalysis();
+  } catch(error) { toast(error.message||'Could not read one or more files. Paste the source into the editor instead.'); }
+}
+
+function crc32(bytes) {
+  let crc=0xffffffff;
+  for (let i=0;i<bytes.length;i++) { crc^=bytes[i];for(let j=0;j<8;j++) crc=(crc&1)?(crc>>>1)^0xedb88320:crc>>>1; }
+  return (crc^0xffffffff)>>>0;
+}
+
+function makeZip(files) {
+  const encoder=new TextEncoder(),localParts=[],centralParts=[];
+  let offset=0;
+  const now=new Date();
+  const dosTime=(now.getHours()<<11)|(now.getMinutes()<<5)|Math.floor(now.getSeconds()/2);
+  const dosDate=((Math.max(1980,now.getFullYear())-1980)<<9)|((now.getMonth()+1)<<5)|now.getDate();
+  for (const file of files) {
+    const safePath=String(file.path||file.name||'source.js').replace(/\\/g,'/').split('/').filter(part=>part&&part!=='.'&&part!=='..').join('/')||'source.js';
+    const nameBytes=encoder.encode(safePath),data=encoder.encode(file.content||''),crc=crc32(data);
+    const local=new Uint8Array(30+nameBytes.length),lv=new DataView(local.buffer);
+    lv.setUint32(0,0x04034b50,true);lv.setUint16(4,20,true);lv.setUint16(6,0x0800,true);lv.setUint16(8,0,true);lv.setUint16(10,dosTime,true);lv.setUint16(12,dosDate,true);lv.setUint32(14,crc,true);lv.setUint32(18,data.length,true);lv.setUint32(22,data.length,true);lv.setUint16(26,nameBytes.length,true);lv.setUint16(28,0,true);local.set(nameBytes,30);
+    localParts.push(local,data);
+    const central=new Uint8Array(46+nameBytes.length),cv=new DataView(central.buffer);
+    cv.setUint32(0,0x02014b50,true);cv.setUint16(4,20,true);cv.setUint16(6,20,true);cv.setUint16(8,0x0800,true);cv.setUint16(10,0,true);cv.setUint16(12,dosTime,true);cv.setUint16(14,dosDate,true);cv.setUint32(16,crc,true);cv.setUint32(20,data.length,true);cv.setUint32(24,data.length,true);cv.setUint16(28,nameBytes.length,true);cv.setUint16(30,0,true);cv.setUint16(32,0,true);cv.setUint16(34,0,true);cv.setUint16(36,0,true);cv.setUint32(38,0,true);cv.setUint32(42,offset,true);central.set(nameBytes,46);centralParts.push(central);
+    offset+=local.length+data.length;
+  }
+  const centralSize=centralParts.reduce((sum,part)=>sum+part.length,0),eocd=new Uint8Array(22),ev=new DataView(eocd.buffer);
+  ev.setUint32(0,0x06054b50,true);ev.setUint16(4,0,true);ev.setUint16(6,0,true);ev.setUint16(8,files.length,true);ev.setUint16(10,files.length,true);ev.setUint32(12,centralSize,true);ev.setUint32(16,offset,true);ev.setUint16(20,0,true);
+  return new Blob([...localParts,...centralParts,eocd],{type:'application/zip'});
+}
+
+function downloadSelectedRepair() {
+  const file=currentSourceResult();if(!file)return;
+  const blob=new Blob([file.corrected],{type:'text/javascript;charset=utf-8'}),url=URL.createObjectURL(blob),anchor=document.createElement('a');
+  anchor.href=url;const base=(file.path.split('/').pop()||'source.js');anchor.download=base.replace(/(\.[^.]+)?$/,'-safescan-fixed$1');anchor.click();setTimeout(()=>URL.revokeObjectURL(url),500);
+  toast(file.edits.length?'Downloaded a separate copy with verified edits.':'Downloaded a separate unchanged copy; no verified edits were available.');
+}
+
+function downloadRepairBundle() {
+  if(!state.sourceResults.length){toast('Run a source scan first.');return;}
+  const bundle=state.sourceResults.map(file=>({path:file.path,content:file.corrected}));
+  const blob=makeZip(bundle),url=URL.createObjectURL(blob),anchor=document.createElement('a');
+  anchor.href=url;anchor.download='safescan-repaired-source.zip';anchor.click();setTimeout(()=>URL.revokeObjectURL(url),800);
+  toast('Downloaded '+bundle.length+' source file(s). Unfixable patterns remain unchanged.');
+}
+
+function refreshRepairSuggestions() {
+  if(state.batchFiles.length) state.sourceResults=state.batchFiles.map(file=>buildSourceResult(file));
+  else if(state.mode==='source'&&$('sourceInput').value.trim()) state.sourceResults=[buildSourceResult({name:state.sourceFileName||'pasted-source.js',path:state.sourceFileName||'pasted-source.js',content:$('sourceInput').value})];
+  renderSourceRepair();renderRepairExecution();
+  toast('Repair suggestions refreshed. Original source files remain unchanged.');
+}
+
+function renderHistory() {
+  const items=state.history;
+  $('navHistory').textContent=items.length;$('historyTotal').textContent=items.length;
+  $('historyRisks').textContent=items.filter(item=>item.severity==='HIGH RISK'||item.severity==='MODERATE RISK'||item.severity==='WARNING').length;
+  const avg=items.length?items.reduce((sum,item)=>sum+(Number(item.durationMs)||0),0)/items.length:null;
+  $('historyAverage').textContent=avg===null?'—':formatDuration(avg);$('historyRepairs').textContent=state.verified;
+  $('historyRows').innerHTML=items.map(item=>{
+    const date=new Date(item.timestamp),dateText=Number.isNaN(date.getTime())?'Unknown date':date.toLocaleString([],{month:'short',day:'2-digit',hour:'2-digit',minute:'2-digit'});
+    const label=item.fileName||'Direct regex';
+    return '<tr><td><span class="history-time">'+esc(dateText)+'</span></td><td><span class="history-input" title="'+esc(item.input)+'">'+esc(label+' · '+item.pattern)+'</span></td><td><span class="pill '+(item.severity==='HIGH RISK'?'red':item.severity==='MODERATE RISK'||item.severity==='WARNING'?'amber':'green')+'">'+esc(item.severity)+'</span><div class="small muted" style="margin-top:3px">'+esc(item.rule)+'</div></td><td>'+esc(formatDuration(Number(item.durationMs)||0))+'</td><td><span class="mono">'+item.nfa+' / '+item.dfa+' / '+item.min+'</span></td><td><button class="btn btn-small" data-history-restore="'+esc(item.id)+'">Restore</button></td></tr>';
+  }).join('')||'<tr><td colspan="6"><div class="empty-state">No saved analyses yet. Run an analysis to create history.</div></td></tr>';
+}
+
+function navigate(view) {
+  if(!names[view])return;
+  document.querySelectorAll('.view').forEach(section=>section.classList.toggle('active',section.id==='view-'+view));
+  document.querySelectorAll('[data-view]').forEach(button=>button.classList.toggle('active',button.dataset.view===view));
+  $('breadcrumb').textContent=names[view];
+  if(view==='automata')renderGraph(state.graph);
+  if(view==='findings')renderFindings();
+  if(view==='repair')renderRepairExecution();
+  if(view==='history')renderHistory();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function applyColorTheme(mode,persist) {
+  const chosen=mode==='dark'?'dark':'light';
+  document.documentElement.classList.toggle('theme-dark',chosen==='dark');
+  document.documentElement.classList.toggle('theme-light',chosen==='light');
+  state.theme=chosen;
+  const button=$('themeToggle');
+  if(button){
+    if(chosen==='dark'){
+      button.setAttribute('aria-label','Switch to light theme');button.title='Switch to light theme';
+      button.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg><span id="themeToggleLabel">Light mode</span>';
+    }else{
+      button.setAttribute('aria-label','Switch to dark theme');button.title='Switch to dark theme';
+      button.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.8 14.3A8.5 8.5 0 0 1 9.7 3.2 8.7 8.7 0 1 0 20.8 14.3Z"/></svg><span id="themeToggleLabel">Dark mode</span>';
+    }
+  }
+  if(persist){try{localStorage.setItem('safescan-theme-v1',chosen);}catch(error){}}
+}
+
+// One click advances exactly one step; edge clicks focus a single transition.
+function startWalk() {
+  if (!state.current) { toast('Run an analysis before tracing transitions.'); return; }
+  const input=$('walkInput').value;
+  if (state.animation && state.animation.type===state.graph && state.animation.input===input) {
+    if (state.animation.focusedEdge) state.animation.focusedEdge=null;
+    if (state.animation.index < state.animation.frames.length-1) state.animation.index++;
+    else { toast('Input sequence finished. Change the input or select another edge.'); return; }
+    state.selectedEdge=null;
+    renderWalkFrame();
+    return;
+  }
+  try {
+    state.animation={type:state.graph,input,frames:makeWalkFrames(state.graph,input),index:0,focusedEdge:null};
+    state.selectedEdge=null;
+    renderWalkFrame();
+    $('walkStatus').innerHTML='<strong>Initial state loaded.</strong> Press “Trace next transition” again to process the first input symbol. Click any graph edge to focus that specific transition.';
+  } catch(error) { $('walkStatus').textContent=error.message; toast(error.message); }
+}
+
+// Repository and repair controls.
+document.querySelectorAll('#inputMode button').forEach(button=>button.addEventListener('click',()=>{if(button.dataset.mode==='regex'){state.batchFiles=[];state.sourceResults=[];state.selectedRepairFile='';}},true));
+async function interceptSourceUpload(event) {
+  event.stopImmediatePropagation();
+  const files=Array.from(event.target.files||[]);
+  event.target.value='';
+  await addSourceFiles(files);
+}
+$('sourceFileInput').addEventListener('change',interceptSourceUpload,true);
+$('sourceFolderInput').addEventListener('change',interceptSourceUpload,true);
+$('uploadFolderButton').addEventListener('click',()=>$('sourceFolderInput').click());
+$('clearSourceFiles').addEventListener('click',()=>{
+  state.batchFiles=[];state.sourceResults=[];state.selectedRepairFile='';state.sourceFileName='';
+  $('sourceFileName').textContent='Paste code or add multiple files';$('sourceBatchSummary').textContent='Select multiple source files, a repository folder, or a GitHub ZIP archive.';$('sourceBatchSummary').classList.add('hidden');
+  $('sourceInput').value='';updateLines();renderSourceRepair();renderRepairExecution();toast('Uploaded source list cleared.');
+});
+$('sourceInput').addEventListener('input',()=>{
+  if(state.mode==='source'&&state.batchFiles.length){
+    state.batchFiles=[];state.sourceResults=[];state.selectedRepairFile='';state.sourceFileName='';
+    $('sourceBatchSummary').classList.add('hidden');$('sourceFileName').textContent='Pasted source input';
+    renderSourceRepair();renderRepairExecution();
+  }
+});
+$('repairFileSelect').addEventListener('change',event=>{state.selectedRepairFile=event.target.value;renderSourceRepair();renderRepairExecution();});
+$('repairTargetSelect').addEventListener('change',event=>{state.selectedRepairFile=event.target.value;renderSourceRepair();renderRepairExecution();});
+$('refreshRepairResults').addEventListener('click',refreshRepairSuggestions);
+$('downloadSelectedRepair').addEventListener('click',downloadSelectedRepair);
+$('downloadRepairBundle').addEventListener('click',downloadRepairBundle);
+$('themeToggle').addEventListener('click',()=>applyColorTheme(state.theme==='dark'?'light':'dark',true));
+document.querySelectorAll('#graphMode button').forEach(button=>button.addEventListener('click',()=>{state.animation=null;state.selectedEdge=null;},true));
+$('findingRows').addEventListener('click',event=>{
+  const button=event.target.closest('[data-finding]');if(!button)return;
+  const finding=state.findings.find(item=>String(item.id)===button.dataset.finding);if(!finding)return;
+  event.preventDefault();event.stopImmediatePropagation();
+  if(finding.sourceMode&&finding.filePath&&state.sourceResults.some(file=>file.path===finding.filePath)){
+    state.selectedRepairFile=finding.filePath;
+    navigate('repair');
+  }else{
+    setInputMode('regex');$('sourceInput').value=finding.pattern;updateLines();runAnalysis();navigate('workbench');
+  }
+},true);
+$('historyRows').addEventListener('click',event=>{
+  const button=event.target.closest('[data-history-restore]');if(!button)return;
+  const item=state.history.find(entry=>String(entry.id)===button.dataset.historyRestore);if(!item)return;
+  event.preventDefault();event.stopImmediatePropagation();
+  setInputMode('regex');$('sourceInput').value=item.pattern;updateLines();runAnalysis();navigate('workbench');
+},true);
+$('refreshRepairResults').setAttribute('title','Rebuild source previews and repair suggestions');
+
+// Theme is explicit (light/dark), not inherited from the browser preference.
+let chosenTheme='light';try{chosenTheme=localStorage.getItem('safescan-theme-v1')||'light';}catch(error){}
+applyColorTheme(chosenTheme,false);
+
+// Additional supported heuristic: adjacent quantified expressions with overlapping first characters.
+function assess(n,pattern) {
+  function nested(x){if(x.type==='repeat'&&containsRepeat(x.child))return true;if(x.type==='group')return nested(x.child);return (x.children||[]).some(nested);}
+  function quantified(x){while(x&&x.type==='group')x=x.child;return !!x&&x.type==='repeat';}
+  function adjacentOverlap(x){
+    if(x.type==='concat'){
+      for(let i=0;i<x.children.length-1;i++){
+        const left=x.children[i],right=x.children[i+1];
+        if(quantified(left)&&quantified(right)){
+          const a=firstChars(left),b=firstChars(right);
+          for(const ch of a)if(b.has(ch))return true;
+        }
+      }
+    }
+    if(x.type==='group')return adjacentOverlap(x.child);
+    if(x.type==='repeat')return adjacentOverlap(x.child);
+    return (x.children||[]).some(adjacentOverlap);
+  }
+  if(nested(n))return {level:'risk',severity:'HIGH RISK',title:'Potential ReDoS risk',subtitle:'Nested repetition heuristic',rule:'NESTED_QUANTIFIER',explanation:'A repeated expression contains another repetition. Some backtracking engines can explore many partitions of a failing input, causing excessive processing time.',evidence:'Nested quantifiers were found in the parsed expression. This structural warning is not a runtime benchmark or proof of exploitability.'};
+  if(overlapsRepeatedAlt(n))return {level:'risk',severity:'MODERATE RISK',title:'Potential ambiguity risk',subtitle:'Repeated alternatives overlap',rule:'OVERLAPPING_ALTERNATION',explanation:'A repeated alternation has branches with overlapping initial characters. Some backtracking engines may retry ambiguous branches on a failing input.',evidence:'Overlapping first-character sets were found inside a repeated expression. This is a heuristic warning.'};
+  if(adjacentOverlap(n))return {level:'risk',severity:'MODERATE RISK',title:'Potential backtracking risk',subtitle:'Adjacent overlapping quantifiers',rule:'ADJACENT_OVERLAPPING_QUANTIFIERS',explanation:'Adjacent repeated expressions can consume the same characters in different ways. A backtracking engine may repeatedly reconsider how to divide a failing input between them.',evidence:'Adjacent quantified expressions with overlapping first-character sets were detected. Actual impact depends on the regex engine and surrounding pattern.'};
+  return {level:'clear',severity:'NO KNOWN SIGNAL',title:'No known risk pattern flagged',subtitle:'Limited heuristic checks passed',rule:'NO_KNOWN_PATTERN',explanation:'The prototype did not detect nested quantification, repeated overlapping alternatives, or adjacent overlapping quantifiers in the supported syntax.',evidence:'No current heuristic rule matched. This does not prove the regex is safe or efficient in every engine.'};
+}
+function chooseSample(which){state.mode='regex';setInputMode('regex');const vals={risk:'^(a+)+$',overlap:'^(a|aa)+$',adjacent:'^(a+)(a+)$',safe:'^[a-z]+$'};$('sourceInput').value=vals[which]||vals.risk;updateLines();runAnalysis();}
+function renderFindings() {
+  const query=($('findingSearch')?.value||'').toLowerCase();
+  const filter=$('findingFilter')?.value||'all';
+  const typeFilter=$('findingTypeFilter')?.value||'all';
+  const typeNotes={all:'Nested quantifiers can multiply backtracking paths; overlapping alternatives and adjacent quantified expressions can cause repeated path reconsideration on failing input. These are heuristics, not proof of exploitability.',nested:'Nested quantifiers repeat an expression that already repeats; a backtracking engine may explore many partitions of a failing string.',overlap:'Overlapping alternatives share possible starting characters; a backtracking engine may repeatedly retry ambiguous branches.',adjacent:'Adjacent overlapping quantifiers can consume the same characters in different ways, making a backtracking engine reconsider how to split a failing input.',clear:'No supported warning rule matched. This does not prove the regex is safe in every engine.',unsupported:'This pattern is outside SafeScan’s supported grammar, so its behavior and ReDoS risk were not assessed.'};
+  $('findingTypeInfo').textContent=typeNotes[typeFilter]||typeNotes.all;
+  const list=state.findings.filter(f=>(f.pattern.toLowerCase().includes(query)||(f.assessment?.rule||'').toLowerCase().includes(query)||(f.fileName||'').toLowerCase().includes(query))&&(filter==='all'||(filter==='risk'&&f.assessment?.level==='risk')||(filter==='clear'&&f.assessment?.level==='clear')||(filter==='error'&&f.assessment?.level==='error'))&&(typeFilter==='all'||(typeFilter==='nested'&&f.assessment?.rule==='NESTED_QUANTIFIER')||(typeFilter==='overlap'&&f.assessment?.rule==='OVERLAPPING_ALTERNATION')||(typeFilter==='adjacent'&&f.assessment?.rule==='ADJACENT_OVERLAPPING_QUANTIFIERS')||(typeFilter==='clear'&&f.assessment?.level==='clear')||(typeFilter==='unsupported'&&f.assessment?.level==='error')));
+  $('findingRows').innerHTML=list.map(f=>{
+    const risk=f.assessment||{level:'error',severity:'UNSUPPORTED',rule:'UNKNOWN',subtitle:'Unsupported pattern'};
+    const label=risk.level==='risk'?(risk.severity==='HIGH RISK'?'red':'amber'):risk.level==='error'?'amber':'green';
+    return '<tr><td><code>'+esc(f.pattern)+'</code></td><td><span class="history-input" title="'+esc(f.fileName||'Direct regex input')+'">'+esc(f.fileName||'Direct regex input')+'</span><div class="small muted">Line '+(f.line||'—')+'</div></td><td><span class="pill '+label+'">'+esc(risk.severity)+'</span></td><td><div>'+esc(risk.rule||'UNKNOWN')+'</div><div class="small muted" style="margin-top:3px">'+esc(risk.subtitle||'')+'</div></td><td><span class="mono">'+(f.nfa||0)+' / '+(f.dfa||0)+' / '+(f.min||0)+'</span><div class="small muted">NFA / DFA / Min</div></td><td><button class="btn btn-small" data-finding="'+String(f.id)+'">Inspect ↗</button></td></tr>';
+  }).join('')||'<tr><td colspan="6"><div class="empty-state">No findings match this filter.</div></td></tr>';
+  if($('countHigh'))$('countHigh').textContent=list.filter(f=>f.assessment?.severity==='HIGH RISK').length;
+  if($('countModerate'))$('countModerate').textContent=list.filter(f=>f.assessment?.severity==='MODERATE RISK'||f.assessment?.severity==='WARNING').length;
+  if($('countLow'))$('countLow').textContent=list.filter(f=>f.assessment?.level==='clear').length;
+}
+const typeFilter=$('findingTypeFilter');
+if(typeFilter&&!Array.from(typeFilter.options).some(option=>option.value==='adjacent')){
+  const option=document.createElement('option');option.value='adjacent';option.textContent='Adjacent overlapping quantifiers';typeFilter.add(option);
+}
+
+function makeSingleEdgeFrames(type,input,startState) {
+  const meta=automataMeta(type);
+  const start=Number.isInteger(startState)?startState:(Number.isInteger(state.selectedState)?state.selectedState:meta.start);
+  const frames=[{active:[start],symbol:'START',note:'Starting from '+meta.prefix+start+'. The graph will highlight one transition at a time.'}];
+  if(type==='nfa'){
+    const nfa=state.current.nfa,queue=[{node:start,index:0,path:[]}],seen=new Set([start+'|0']);
+    let best=queue[0],accepted=null;
+    while(queue.length){
+      const current=queue.shift();
+      if(current.index>best.index||(current.index===best.index&&current.path.length<best.path.length))best=current;
+      if(current.index===input.length&&current.node===nfa.accept){accepted=current;break;}
+      for(const edge of nfa.edges){
+        if(edge.from!==current.node)continue;
+        let nextIndex=current.index,symbol='ε';
+        if(edge.chars!==null){
+          if(current.index>=input.length||!edge.chars.has(input[current.index]))continue;
+          symbol=prettyChar(input[current.index]);nextIndex++;
+        }
+        const key=edge.to+'|'+nextIndex;if(seen.has(key))continue;seen.add(key);
+        queue.push({node:edge.to,index:nextIndex,path:current.path.concat([{edge,symbol,nextIndex}])});
+      }
+    }
+    const path=(accepted||best).path;
+    path.forEach((step,i)=>frames.push({active:[step.edge.to],fromState:step.edge.from,toState:step.edge.to,symbol:step.symbol,note:'Transition '+(i+1)+': q'+step.edge.from+' → q'+step.edge.to+' on '+step.symbol+'. Only this edge is highlighted.'}));
+    if(accepted)frames[frames.length-1].finalNote='One accepting NFA path consumed the full input.';
+    else if(path.length)frames[frames.length-1].finalNote='This is one available path prefix; the full input did not reach the accept state on the selected path.';
+    return frames;
+  }
+  const machine=type==='min'?state.current.min:state.current.dfa;
+  let current=start;
+  for(const ch of input){
+    const next=machine.trans[current]?.get(ch);
+    if(!Number.isInteger(next))break;
+    const label=meta.edges.find(edge=>edge.from===current&&edge.to===next)?.label||prettyChar(ch);
+    frames.push({active:[next],fromState:current,toState:next,symbol:prettyChar(ch),note:'Transition '+meta.prefix+current+' → '+meta.prefix+next+' on '+label+'. Only this edge is highlighted.'});
+    current=next;
+  }
+  if(frames.length>1)frames[frames.length-1].finalNote=machine.accept.has(current)?'The displayed path ends in an accepting state.':'The displayed path ends in a non-accepting state.';
+  return frames;
+}
+function selectAutomataState(id,type) {
+  const meta=automataMeta(type);if(!meta)return;
+  stopWalkTimer();id=Number(id);state.selectedState=id;state.selectedEdge=null;state.animation=null;
+  const svg=$('graphWrap').querySelector('svg');
+  if(svg){
+    svg.querySelectorAll('.automata-node').forEach(node=>{node.classList.toggle('selected',Number(node.dataset.state)===id);node.classList.remove('walk-active');});
+    svg.querySelectorAll('.automata-edge').forEach(edge=>{edge.classList.remove('outgoing','walk-active','edge-selected');});
+  }
+  const role=id===meta.start?'Start state':meta.accept.has(id)?'Accepting state':'Intermediate state';
+  $('selectedStateTitle').textContent=meta.prefix+id+' · '+role;
+  const outgoing=meta.edges.filter(edge=>edge.from===id);
+  $('selectedStateInfo').innerHTML='<div><strong>'+esc(meta.prefix+id)+'</strong> is '+esc(role.toLowerCase())+'.</div><div style="margin-top:7px">Outgoing transitions: <strong>'+outgoing.length+'</strong></div><div style="margin-top:6px">'+(outgoing.length?outgoing.map(edge=>'<div class="mono" style="padding:3px 0">'+esc(edge.label)+' → '+esc(meta.prefix+edge.to)+'</div>').join(''):'No outgoing transitions in this graph.')+'</div><div class="small muted" style="margin-top:7px">Press Start / next to animate a single path from this state.</div>';
+  $('walkStatus').textContent='Selected '+meta.prefix+id+'. Start / next will trace one transition at a time from this state.';
+}
+function bindGraphInteractions(type) {
+  const svg=$('graphWrap').querySelector('svg');if(!svg)return;
+  svg.querySelectorAll('.automata-node').forEach(node=>{
+    node.addEventListener('click',()=>selectAutomataState(node.dataset.state,type));
+    node.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();selectAutomataState(node.dataset.state,type);}});
+  });
+  svg.querySelectorAll('.automata-edge').forEach(edge=>{
+    edge.addEventListener('click',event=>{
+      event.stopPropagation();stopWalkTimer();
+      const chosen={from:Number(edge.dataset.from),to:Number(edge.dataset.to),label:edge.dataset.label,type};
+      state.selectedEdge=chosen;state.selectedState=chosen.from;state.animation=null;
+      svg.querySelectorAll('.automata-node').forEach(node=>{node.classList.toggle('selected',Number(node.dataset.state)===chosen.from);node.classList.remove('walk-active');});
+      svg.querySelectorAll('.automata-edge').forEach(item=>{item.classList.remove('outgoing','walk-active','edge-selected');});
+      edge.classList.add('edge-selected');
+      $('walkStatus').innerHTML='<strong>Edge selected:</strong> '+esc(automataMeta(type).prefix+chosen.from)+' — <strong>'+esc(chosen.label)+'</strong> → '+esc(automataMeta(type).prefix+chosen.to)+'. Press Start / next to animate only this edge.';
+      $('selectedStateTitle').textContent='Selected edge';
+      $('selectedStateInfo').textContent=automataMeta(type).prefix+chosen.from+' transitions to '+automataMeta(type).prefix+chosen.to+' on '+chosen.label+'. No other route will be animated for this edge selection.';
+    });
+  });
+}
+function renderWalkFrame() {
+  const walk=state.animation;if(!walk)return;
+  const frame=walk.frames[walk.index]||walk.frames[0],meta=automataMeta(walk.type),svg=$('graphWrap').querySelector('svg');
+  const transition=walk.index>0&&frame.fromState!==undefined&&frame.toState!==undefined;
+  if(svg){
+    svg.querySelectorAll('.automata-node').forEach(node=>node.classList.toggle('walk-active',frame.active.includes(Number(node.dataset.state))));
+    svg.querySelectorAll('.automata-edge').forEach(edge=>{
+      const same=edge.dataset.from===String(frame.fromState)&&edge.dataset.to===String(frame.toState);
+      const exact=walk.focusedEdge&&Number(edge.dataset.from)===walk.focusedEdge.from&&Number(edge.dataset.to)===walk.focusedEdge.to&&edge.dataset.label===walk.focusedEdge.label;
+      edge.classList.remove('outgoing');
+      edge.classList.toggle('walk-active',transition&&(walk.edgeSpecific?!!exact:!!same));
+      edge.classList.toggle('edge-selected',transition&&(walk.edgeSpecific?!!exact:!!same));
+    });
+  }
+  if(transition){
+    $('walkStatus').innerHTML='<strong>Transition '+walk.index+' of '+(walk.frames.length-1)+':</strong> '+esc(meta.prefix+frame.fromState)+' → '+esc(meta.prefix+frame.toState)+' on <strong>'+esc(frame.symbol)+'</strong>. '+esc(frame.note);
+    $('selectedStateTitle').textContent=meta.prefix+frame.toState+' · Next state';
+    $('selectedStateInfo').textContent='Only the edge '+meta.prefix+frame.fromState+' → '+meta.prefix+frame.toState+' is highlighted. '+(frame.finalNote||'Press Next transition to show the next edge.');
+  }else{
+    $('walkStatus').innerHTML='<strong>Starting state:</strong> '+esc(meta.prefix+frame.active[0])+'. Press Start / next to show the first edge.';
+    $('selectedStateTitle').textContent=meta.prefix+frame.active[0]+' · Starting state';
+    $('selectedStateInfo').textContent=frame.note;
+  }
+  $('walkStepTrack').innerHTML=walk.frames.map((item,i)=>'<button class="walk-frame '+(i===walk.index?'active':'')+'" data-walk-index="'+i+'" type="button">'+(i===0?'START':esc(meta.prefix+item.fromState)+' → '+esc(meta.prefix+item.toState)+' · '+esc(item.symbol))+'</button>').join('');
+  $('walkStepTrack').querySelectorAll('[data-walk-index]').forEach(button=>button.addEventListener('click',()=>moveWalkTo(Number(button.dataset.walkIndex),true)));
+}
+function moveWalkTo(index,pause) {
+  if(!state.animation)return;if(pause)stopWalkTimer();
+  state.animation.index=Math.max(0,Math.min(index,state.animation.frames.length-1));renderWalkFrame();
+}
+function startWalk() {
+  if(!state.current){toast('Run an analysis before tracing transitions.');return;}
+  const input=$('walkInput').value;
+  if(state.selectedEdge&&state.selectedEdge.type===state.graph){
+    const chosen=state.selectedEdge,meta=automataMeta(state.graph);
+    const frames=[{active:[chosen.from],symbol:'START',note:'Selected edge starts at '+meta.prefix+chosen.from+'.'},{active:[chosen.to],fromState:chosen.from,toState:chosen.to,symbol:chosen.label,note:'The selected edge '+meta.prefix+chosen.from+' → '+meta.prefix+chosen.to+' is the only transition shown.'}];
+    state.animation={type:state.graph,input,frames,index:1,focusedEdge:chosen,edgeSpecific:true,startState:chosen.from};renderWalkFrame();return;
+  }
+  if(state.animation&&state.animation.type===state.graph&&state.animation.input===input){
+    if(state.animation.edgeSpecific){toast('This is a single-edge animation. Select another edge or reset to trace an input path.');return;}
+    if(state.animation.index<state.animation.frames.length-1){state.animation.index++;renderWalkFrame();}
+    else toast('Input path finished. Reset to replay it or select a state to start elsewhere.');
+    return;
+  }
+  try{
+    const meta=automataMeta(state.graph),start=Number.isInteger(state.selectedState)?state.selectedState:meta.start;
+    const frames=makeSingleEdgeFrames(state.graph,input,start);
+    state.animation={type:state.graph,input,frames,index:frames.length>1?1:0,focusedEdge:null,edgeSpecific:false,startState:start};
+    state.selectedEdge=null;renderWalkFrame();
+    if(frames.length<=1)toast('No outgoing transition matched this input from the selected state.');
+  }catch(error){$('walkStatus').textContent=error.message;toast(error.message);}
+}
+function resetWalk() {
+  stopWalkTimer();const meta=automataMeta(state.graph);if(!meta)return;
+  const start=state.animation?.startState??state.selectedState??meta.start,input=$('walkInput').value;
+  state.selectedEdge=null;
+  try{state.animation={type:state.graph,input,frames:makeSingleEdgeFrames(state.graph,input,start),index:0,focusedEdge:null,edgeSpecific:false,startState:start};renderWalkFrame();}
+  catch(error){state.animation=null;$('walkStatus').textContent=error.message;toast(error.message);}
+}
+
+// Interactive automata walkthrough controls.
+ $('walkStart').addEventListener('click',startWalk);
+ $('walkPrev').addEventListener('click',()=>{if(!state.animation)return toast('Start an animation first.');moveWalkTo(state.animation.index-1,true);});
+ $('walkNext').addEventListener('click',()=>{if(!state.animation)return toast('Start an animation first.');moveWalkTo(state.animation.index+1,true);});
+ $('walkReset').addEventListener('click',resetWalk);
+ $('walkInput').addEventListener('keydown',event=>{if(event.key==='Enter')startWalk();});
+ document.querySelectorAll('#graphMode button').forEach(button=>button.addEventListener('click',()=>{stopWalkTimer();state.animation=null;},true));
+ $('sourceInput').addEventListener('input',()=>{if(state.mode==='source')renderSourceRepair();});
+ $('accentSelect').addEventListener('change',()=>applyAccentTheme($('accentSelect').value,true));
+ $('uploadSourceButton').addEventListener('click',()=>$('sourceFileInput').click());
+ $('sourceFileInput').addEventListener('change',async event=>{const file=event.target.files?.[0];if(!file)return;try{const code=await file.text();state.sourceFileName=file.name;setInputMode('source');$('sourceInput').value=code;$('fileHint').textContent=file.name;updateLines();renderSourceRepair();runAnalysis();}catch(error){toast('Could not read this file. Paste the code into the editor instead.');}finally{event.target.value='';}});
+ $('copyCorrectedCode').addEventListener('click',copyCorrectedCode);
+ $('downloadCorrectedCode').addEventListener('click',downloadCorrectedCode);
+ $('historyRows').addEventListener('click',event=>{const button=event.target.closest('[data-history-restore]');if(button)restoreHistory(button.dataset.historyRestore);});
+ $('clearHistoryButton').addEventListener('click',()=>{state.history=[];saveHistory();renderHistory();toast('Local scan history cleared.');});
+ // Initial sample analysis is real local execution, clearly labeled as an example.
+loadHistory();let savedAccent='teal';try{savedAccent=localStorage.getItem('safescan-accent-v1')||'teal';}catch(error){}applyAccentTheme(savedAccent,false);state.suppressHistory=true;setInputMode('regex');updateLines();runAnalysis();state.suppressHistory=false;$('lastRunLabel').textContent='Example loaded · not a repository scan';$('taintCode').value=defaultSource;renderHistory();
+})();
+</script>
+
+<!--sites-preview-theme:start-->
+<style data-sites-preview-theme>:root{--site-primary:#e8f3fe !important;--site-background:#63a8f8 !important;--site-font-body:system-ui,sans-serif !important;--site-font-heading:system-ui,sans-serif !important;--site-heading-scale:1.05 !important}</style>
+<script type="application/json" data-sites-preview-theme>{"appearance":"custom","primary":"#e8f3fe","secondary":null,"background":"#63a8f8","typography":"modern","spacing":1,"roundness":1,"headingScale":1.05,"decorationOpacity":null}</script>
+<!--sites-preview-theme:end-->
+</body>
+</html>
